@@ -1,0 +1,128 @@
+:root {
+  color-scheme: light;
+  --ink: #35291f;
+  --muted: #786b5b;
+  --paper: #fffdf7;
+  --cloth: #f3ead8;
+  --olive: #59613b;
+  --olive-dark: #40482a;
+  --tomato: #a74732;
+  --gold: #c28b3c;
+  --line: #e6d8bf;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 64px 24px 80px;
+  color: var(--ink);
+  background-color: var(--cloth);
+  background-image: radial-gradient(#d9cbb3 0.65px, transparent 0.65px);
+  background-size: 9px 9px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+body > h1,
+body > p,
+.receta {
+  position: relative;
+}
+
+body > h1 {
+  margin: 0;
+  color: var(--olive-dark);
+  font-size: clamp(2.2rem, 6vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1.12;
+  text-align: center;
+  text-wrap: balance;
+}
+
+body > h1::after {
+  display: block;
+  width: 76px;
+  height: 3px;
+  margin: 24px auto 0;
+  background: var(--tomato);
+  content: "";
+}
+
+body > p {
+  max-width: 590px;
+  margin: 20px auto 42px;
+  color: var(--muted);
+  font-size: 1.08rem;
+  text-align: center;
+}
+
+.receta {
+  margin: 24px 0;
+  padding: clamp(24px, 5vw, 38px);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--olive);
+  border-radius: 4px;
+  background: var(--paper);
+  box-shadow: 0 8px 24px rgb(72 54 31 / 8%);
+}
+
+.receta h2 {
+  margin: 0 0 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--tomato);
+  font-size: clamp(1.55rem, 4vw, 2rem);
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.receta h3 {
+  margin: 25px 0 8px;
+  color: var(--olive-dark);
+  font-size: 1.05rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.receta ul,
+.receta ol {
+  margin: 8px 0 0;
+  padding-left: 1.5rem;
+}
+
+.receta li {
+  padding: 3px 0 3px 5px;
+}
+
+.receta li::marker {
+  color: var(--gold);
+}
+
+@media (max-width: 560px) {
+  body {
+    padding: 38px 16px 52px;
+    font-size: 16px;
+  }
+
+  body > p {
+    margin-bottom: 30px;
+  }
+
+  .receta {
+    margin: 18px 0;
+    padding: 22px 20px;
+  }
+}
