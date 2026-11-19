@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carcinus: El Universo Definitivo de los Cangrejos y la Evolución Perfecta</title>
+    <meta name="description" content="Una revista científica marina de lujo dedicada al universo de los cangrejos, su evolución, anatomía y el fenómeno de la carcinización.">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <style>
+        :root {
+            --bg-abyss: #070d19;
+            --bg-abyss-deep: #0b131f;
+            --ocean-blue: #0284c7;
+            --celeste: #38bdf8;
+            --turquoise: #2dd4bf;
+            --turquoise-deep: #14b8a6;
+            --crab-red: #ef4444;
+            --crab-red-deep: #dc2626;
+            --coral: #f87171;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            background: radial-gradient(ellipse at top, #0f172a 0%, var(--bg-abyss) 50%, #020617 100%);
+            color: #e2e8f0;
+            overflow-x: hidden;
+            line-height: 1.7;
+        }
+        
+        /* Dynamic scroll margins for fixed navbar */
+        section {
+            scroll-margin-top: 100px;
+        }
+        
+        @media (max-width: 768px) {
+            section {
+                scroll-margin-top: 80px;
+            }
+        }
+        
+        /* Typography */
+        .font-display {
+            font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+        }
+        
+        /* Glassmorphism */
+        .glass {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(45, 212, 191, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37),
+                        0 0 0 1px rgba(45, 212, 191, 0.05) inset;
+        }
+        
+        .glass-strong {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(45, 212, 191, 0.25);
+            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5),
+                        0 0 60px rgba(45, 212, 191, 0.1) inset;
+        }
+        
+        /* Navbar */
+        .navbar {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .navbar.scrolled {
+            background: rgba(7, 13, 25, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5),
+                        0 1px 0 rgba(45, 212, 191, 0.2);
+            border-bottom: 1px solid rgba(45, 212, 191, 0.2);
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--turquoise), var(--celeste));
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px rgba(45, 212, 191, 0.6);
+        }
+        
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .nav-link.active {
+            color: var(--turquoise);
+            text-shadow: 0 0 10px rgba(45, 212, 191, 0.5);
+        }
+        
+        /* Floating particles */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.8) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float linear infinite;
+            filter: blur(1px);
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px) scale(1);
+                opacity: 0;
+            }
+        }
+        
+        /* Hero button */
+        .btn-crab {
+            background: linear-gradient(135deg, var(--crab-red) 0%, var(--crab-red-deep) 100%);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.4),
+                        0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-crab::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-crab:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-crab:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 0 50px rgba(239, 68, 68, 0.6),
+                        0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn-crab:active {
+            transform: translateY(0) scale(0.98);
+        }
+        
+        .btn-crab span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+                        0 0 40px rgba(45, 212, 191, 0.2),
+                        0 0 0 1px rgba(45, 212, 191, 0.3) inset;
+        }
+        
+        .card-hover:hover .card-glow {
+            opacity: 1;
+        }
+        
+        .card-glow {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(45, 212, 191, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        /* Animated gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #e2e8f0 0%, var(--turquoise) 50%, var(--celeste) 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 8s ease infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Carcinization diagram */
+        .crab-shape {
+            transition: all 0.5s ease;
+        }
+        
+        .diagram-item:hover .crab-shape {
+            filter: drop-shadow(0 0 20px rgba(45, 212, 191, 0.6));
+            transform: scale(1.1);
+        }
+        
+        /* Filter buttons */
+        .filter-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--turquoise) 0%, var(--turquoise-deep) 100%);
+            color: #020617;
+            font-weight: 600;
+            box-shadow: 0 0 20px rgba(45, 212, 191, 0.5);
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .modal-content {
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Tabs */
+        .tab-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(45, 212, 191, 0.2) 0%, rgba(56, 189, 248, 0.2) 100%);
+            color: var(--turquoise);
+            border-bottom: 2px solid var(--turquoise);
+            box-shadow: 0 4px 20px rgba(45, 212, 191, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Interactive Map */
+        .map-point {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .map-point:hover {
+            transform: scale(1.3);
+            filter: drop-shadow(0 0 15px currentColor);
+        }
+        
+        .map-point.active {
+            transform: scale(1.5);
+            filter: drop-shadow(0 0 25px currentColor);
+            animation: pulse 2s ease infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+        
+        .map-info-panel {
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+        
+        .map-info-panel.active {
+            display: block;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-abyss);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--turquoise) 0%, var(--turquoise-deep) 100%);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--turquoise);
+        }
+        
+        /* Leaflet Map Customization */
+        #crab-map {
+            height: 500px;
+            width: 100%;
+            border-radius: 1rem;
+            z-index: 1;
+        }
+        
+        @media (min-width: 768px) {
+            #crab-map {
+                height: 600px;
+            }
+        }
+        
+        .leaflet-container {
+            background: #020617 !important;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .leaflet-tile {
+            filter: brightness(0.5) contrast(1.3) saturate(0.7) invert(1) hue-rotate(180deg);
+        }
+        
+        .leaflet-popup-content-wrapper {
+            background: rgba(15, 23, 42, 0.92) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            color: #e2e8f0 !important;
+            border: 1px solid rgba(45, 212, 191, 0.3) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(45, 212, 191, 0.2) !important;
+        }
+        
+        .leaflet-popup-content {
+            margin: 16px !important;
+            min-width: 260px;
+        }
+        
+        .leaflet-popup-tip {
+            background: rgba(15, 23, 42, 0.92) !important;
+            border: 1px solid rgba(45, 212, 191, 0.3) !important;
+        }
+        
+        .leaflet-popup-close-button {
+            color: #94a3b8 !important;
+            font-size: 20px !important;
+            padding: 4px 8px !important;
+        }
+        
+        .leaflet-popup-close-button:hover {
+            color: #2dd4bf !important;
+        }
+        
+        .crab-marker {
+            background: transparent;
+            border: none;
+        }
+        
+        .crab-marker-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6), 0 4px 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .crab-marker-icon::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Particles Background -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 transition-all duration-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg shadow-red-500/50">
+                        <i data-lucide="crab" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <span class="font-display text-xl font-bold gradient-text hidden sm:block">Carcinus</span>
+                </div>
+                
+                <div class="hidden lg:flex items-center space-x-8">
+                    <a href="#inicio" class="nav-link text-slate-300 hover:text-white font-medium text-sm">Inicio</a>
+                    <a href="#introduccion" class="nav-link text-slate-300 hover:text-white font-medium text-sm">Introducción</a>
+                    <a href="#carcinizacion" class="nav-link text-slate-300 hover:text-white font-medium text-sm">Carcinización</a>
+                    <a href="#especies" class="nav-link text-slate-300 hover:text-white font-medium text-sm">Especies</a>
+                    <a href="#mapa" class="nav-link text-slate-300 hover:text-white font-medium text-sm">Mapa Mundial</a>
+                    <a href="#sociocultural" class="nav-link text-slate-300 hover:text-white font-medium text-sm">Socio-Cultural</a>
+                    <a href="#ecologia" class="nav-link text-slate-300 hover:text-white font-medium text-sm">Ecología</a>
+                </div>
+                
+                <button class="lg:hidden text-white" id="mobile-menu-btn">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden glass border-t border-teal-500/20">
+            <div class="px-4 py-4 space-y-3">
+                <a href="#inicio" class="block text-slate-300 hover:text-white font-medium">Inicio</a>
+                <a href="#introduccion" class="block text-slate-300 hover:text-white font-medium">Introducción</a>
+                <a href="#carcinizacion" class="block text-slate-300 hover:text-white font-medium">Carcinización</a>
+                <a href="#especies" class="block text-slate-300 hover:text-white font-medium">Especies</a>
+                <a href="#mapa" class="block text-slate-300 hover:text-white font-medium">Mapa Mundial</a>
+                <a href="#sociocultural" class="block text-slate-300 hover:text-white font-medium">Socio-Cultural</a>
+                <a href="#ecologia" class="block text-slate-300 hover:text-white font-medium">Ecología</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section id="inicio" class="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-slate-950"></div>
+        
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="mb-6">
+                <span class="inline-block px-4 py-2 glass rounded-full text-sm text-teal-400 font-medium mb-6">
+                    <i data-lucide="sparkles" class="w-4 h-4 inline mr-2"></i>
+                    Revista Científica Marina de Lujo
+                </span>
+            </div>
+            
+            <h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-black mb-6 leading-tight">
+                <span class="gradient-text">Carcinus:</span><br>
+                <span class="text-white">La Cima de la Evolución</span>
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-slate-300 mb-10 max-w-4xl mx-auto leading-relaxed">
+                Más de 6,700 especies, una anatomía perfecta y una historia evolutiva que converge hacia un mismo destino
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <a href="#introduccion" class="btn-crab px-8 py-4 rounded-lg font-semibold text-white text-lg">
+                    <span class="flex items-center">
+                        <i data-lucide="arrow-down" class="w-5 h-5 mr-2"></i>
+                        Explorar el Universo
+                    </span>
+                </a>
+                <a href="#carcinizacion" class="glass px-8 py-4 rounded-lg font-semibold text-white text-lg hover:bg-slate-800/50 transition-all duration-300 hover:shadow-lg hover:shadow-teal-500/20">
+                    <span class="flex items-center">
+                        <i data-lucide="git-branch" class="w-5 h-5 mr-2"></i>
+                        Descubrir la Carcinización
+                    </span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <i data-lucide="chevron-down" class="w-6 h-6 text-teal-400"></i>
+        </div>
+    </section>
+    
+    <!-- Section 1: Introducción Biológica y Anatómica -->
+    <section id="introduccion" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block px-4 py-2 glass rounded-full text-sm text-teal-400 font-medium mb-4">
+                    Biología y Morfología
+                </span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-6 gradient-text">Introducción Biológica y Anatómica</h2>
+                <p class="text-xl text-slate-400 max-w-3xl mx-auto">
+                    Una máquina evolutiva perfectamente diseñada para la vida en medios acuáticos y terrestres
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
+                <div class="space-y-6">
+                    <div class="glass p-6 rounded-xl card-hover relative overflow-hidden">
+                        <div class="card-glow"></div>
+                        <div class="flex items-start space-x-4 relative z-10">
+                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-500/20 flex items-center justify-center flex-shrink-0 border border-teal-500/30">
+                                <i data-lucide="shield" class="w-6 h-6 text-teal-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-white mb-2">Exoesqueleto Protector</h3>
+                                <p class="text-slate-300">
+                                    Compuesto principalmente de <strong class="text-teal-400">quitina</strong> y <strong class="text-teal-400">carbonato cálcico</strong>, 
+                                    formando un caparazón rígido que protege el cefalotórax. Este exoesqueleto debe ser mudado periódicamente 
+                                    a través del proceso de <em>ecdisis</em> para permitir el crecimiento.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass p-6 rounded-xl card-hover relative overflow-hidden">
+                        <div class="card-glow"></div>
+                        <div class="flex items-start space-x-4 relative z-10">
+                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center flex-shrink-0 border border-cyan-500/30">
+                                <i data-lucide="lungs" class="w-6 h-6 text-cyan-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-white mb-2">Sistema Respiratorio</h3>
+                                <p class="text-slate-300">
+                                    Poseen <strong class="text-cyan-400">branquias</strong> altamente vascularizadas, adaptadas para extraer oxígeno 
+                                    del agua. Algunas especies terrestres han desarrollado branquias modificadas que funcionan en aire húmedo, 
+                                    demostrando su extraordinaria adaptabilidad.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass p-6 rounded-xl card-hover relative overflow-hidden">
+                        <div class="card-glow"></div>
+                        <div class="flex items-start space-x-4 relative z-10">
+                            <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center flex-shrink-0 border border-blue-500/30">
+                                <i data-lucide="eye" class="w-6 h-6 text-blue-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-white mb-2">Órganos Sensoriales</h3>
+                                <p class="text-slate-300">
+                                    Ojos compuestos sobre <strong class="text-blue-400">pedúnculos oculares</strong> móviles, antenas quimiorreceptoras 
+                                    altamente sensibles y mecanorreceptores que les permiten detectar presas, depredadores y cambios en su entorno 
+                                    con gran precisión.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-strong p-8 rounded-2xl">
+                    <h3 class="text-2xl font-display font-bold text-white mb-6 text-center">Morfología Característica</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-4 rounded-lg bg-slate-800/50 border border-teal-500/20">
+                            <span class="text-slate-300">Cefalotórax</span>
+                            <span class="text-teal-400 font-semibold">Fusionado, protegido por caparazón</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 rounded-lg bg-slate-800/50 border border-teal-500/20">
+                            <span class="text-slate-300">Abdomen</span>
+                            <span class="text-teal-400 font-semibold">Reducido y doblado ventralmente</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 rounded-lg bg-slate-800/50 border border-teal-500/20">
+                            <span class="text-slate-300">Quelas (Pinzas)</span>
+                            <span class="text-teal-400 font-semibold">Desarrolladas, asimétricas</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 rounded-lg bg-slate-800/50 border border-teal-500/20">
+                            <span class="text-slate-300">Pereiópodos</span>
+                            <span class="text-teal-400 font-semibold">5 pares, locomoción y función</span>
+                        </div>
+                        <div class="flex justify-between items-center p-4 rounded-lg bg-slate-800/50 border border-teal-500/20">
+                            <span class="text-slate-300">Pleópodos</span>
+                            <span class="text-teal-400 font-semibold">Reducidos o ausentes en adultos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Life Cycle -->
+            <div class="glass-strong p-8 md:p-12 rounded-2xl">
+                <h3 class="text-3xl font-display font-bold text-white mb-8 text-center">Ciclo Vital Completo</h3>
+                <div class="grid md:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-blue-500/30 to-cyan-500/30 flex items-center justify-center border-2 border-blue-400/50">
+                            <span class="text-2xl font-bold text-blue-400">1</span>
+                        </div>
+                        <h4 class="text-lg font-semibold text-white mb-2">Huevo</h4>
+                        <p class="text-sm text-slate-400">Fertilizados, adheridos al abdomen de la hembra</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-500/30 to-teal-500/30 flex items-center justify-center border-2 border-cyan-400/50">
+                            <span class="text-2xl font-bold text-cyan-400">2</span>
+                        </div>
+                        <h4 class="text-lg font-semibold text-white mb-2">Zoea</h4>
+                        <p class="text-sm text-slate-400">Larva planctónica con espinas, nadadora activa</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-teal-500/30 to-emerald-500/30 flex items-center justify-center border-2 border-teal-400/50">
+                            <span class="text-2xl font-bold text-teal-400">3</span>
+                        </div>
+                        <h4 class="text-lg font-semibold text-white mb-2">Megalopa</h4>
+                        <p class="text-sm text-slate-400">Transición, abdomen alargado, comienza asentamiento</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-emerald-500/30 to-green-500/30 flex items-center justify-center border-2 border-emerald-400/50">
+                            <span class="text-2xl font-bold text-emerald-400">4</span>
+                        </div>
+                        <h4 class="text-lg font-semibold text-white mb-2">Metamorfosis Bentónica</h4>
+                        <p class="text-sm text-slate-400">Forma juvenil de cangrejo, vida bentónica</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Section 2: La Carcinización -->
+    <section id="carcinizacion" class="py-24 relative bg-gradient-to-b from-slate-950/50 to-slate-900/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block px-4 py-2 glass rounded-full text-sm text-teal-400 font-medium mb-4">
+                    Evolución Convergente
+                </span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-6 gradient-text">La Carcinización</h2>
+                <p class="text-xl text-slate-400 max-w-3xl mx-auto">
+                    Por qué la naturaleza tiende independientemente a la forma de cangrejo
+                </p>
+            </div>
+            
+            <div class="glass-strong p-8 md:p-12 rounded-2xl mb-12">
+                <div class="max-w-4xl mx-auto">
+                    <p class="text-lg text-slate-300 mb-6 leading-relaxed">
+                        El término <strong class="text-teal-400">"carcinización"</strong> fue acuñado por el zoólogo inglés <strong>Lancelot Alexander Borradaile</strong> 
+                        en 1916 para describir un fenómeno evolutivo fascinante: la evolución convergente hacia una morfología similar a la de un cangrejo 
+                        (braquiuroide) en múltiples linajes de crustáceos decápodos no estrechamente relacionados.
+                    </p>
+                    <p class="text-lg text-slate-300 mb-6 leading-relaxed">
+                        Este proceso implica la <strong class="text-cyan-400">reducción del abdomen</strong>, su <strong class="text-cyan-400">plegamiento ventral</strong>, 
+                        el <strong class="text-cyan-400">ensanchamiento y aplanamiento del cefalotórax</strong>, y una reorganización general que resulta en una forma 
+                        corporal compacta y hidrodinámicamente eficiente.
+                    </p>
+                    <div class="p-6 rounded-xl bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/30">
+                        <p class="text-lg text-slate-200 italic text-center">
+                            <i data-lucide="quote" class="w-6 h-6 inline text-red-400 mb-2"></i><br>
+                            "Es notable que en cinco ocasiones diferentes, un grupo de crustáceos ha evolucionado independientemente 
+                            para adquirir la forma general que llamamos 'cangrejo'."
+                            <br>
+                            <span class="text-sm text-slate-400 not-italic mt-2 block">— L.A. Borradaile, 1916</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Interactive Diagram -->
+            <div class="glass-strong p-8 md:p-12 rounded-2xl">
+                <h3 class="text-2xl font-display font-bold text-white mb-8 text-center">Diagrama Comparativo Interactivo</h3>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- Ancestral -->
+                    <div class="diagram-item text-center group">
+                        <div class="relative mb-6">
+                            <div class="w-48 h-48 mx-auto rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center border border-slate-600/30 group-hover:border-slate-400/50 transition-all duration-300">
+                                <svg class="crab-shape w-32 h-32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Lobster-like ancestral form -->
+                                    <ellipse cx="50" cy="60" rx="35" ry="20" fill="url(#grad1)" opacity="0.7"/>
+                                    <rect x="15" y="50" width="70" height="20" rx="10" fill="url(#grad1)" opacity="0.7"/>
+                                    <ellipse cx="25" cy="45" rx="12" ry="8" fill="url(#grad1)" opacity="0.7"/>
+                                    <ellipse cx="75" cy="45" rx="12" ry="8" fill="url(#grad1)" opacity="0.7"/>
+                                    <!-- Long tail -->
+                                    <path d="M 50 70 Q 50 90 45 95 Q 50 98 55 95 Q 50 90 50 70" fill="url(#grad1)" opacity="0.7"/>
+                                    <circle cx="35" cy="42" r="3" fill="#38bdf8"/>
+                                    <circle cx="65" cy="42" r="3" fill="#38bdf8"/>
+                                    <defs>
+                                        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#64748b;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#475569;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            </div>
+                        </div>
+                        <h4 class="text-xl font-semibold text-white mb-2">Forma Ancestral</h4>
+                        <p class="text-sm text-slate-400 mb-3">Langosta / Galateido</p>
+                        <ul class="text-xs text-slate-500 space-y-1">
+                            <li>• Abdomen alargado</li>
+                            <li>• Cefalotórax alargado</li>
+                            <li>• Natación eficiente</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Transitional -->
+                    <div class="diagram-item text-center group">
+                        <div class="relative mb-6">
+                            <div class="w-48 h-48 mx-auto rounded-2xl bg-gradient-to-br from-slate-700/50 to-slate-800/50 flex items-center justify-center border border-teal-500/30 group-hover:border-teal-400/50 transition-all duration-300 shadow-lg shadow-teal-500/10">
+                                <svg class="crab-shape w-32 h-32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- Transitional form -->
+                                    <ellipse cx="50" cy="55" rx="32" ry="22" fill="url(#grad2)" opacity="0.8"/>
+                                    <rect x="18" y="48" width="64" height="22" rx="11" fill="url(#grad2)" opacity="0.8"/>
+                                    <ellipse cx="28" cy="42" rx="11" ry="7" fill="url(#grad2)" opacity="0.8"/>
+                                    <ellipse cx="72" cy="42" rx="11" ry="7" fill="url(#grad2)" opacity="0.8"/>
+                                    <!-- Shortened tail -->
+                                    <path d="M 50 70 Q 50 82 48 86 Q 50 88 52 86 Q 50 82 50 70" fill="url(#grad2)" opacity="0.8"/>
+                                    <circle cx="38" cy="39" r="3" fill="#2dd4bf"/>
+                                    <circle cx="62" cy="39" r="3" fill="#2dd4bf"/>
+                                    <defs>
+                                        <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#0f766e;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            </div>
+                        </div>
+                        <h4 class="text-xl font-semibold text-white mb-2">Forma Transicional</h4>
+                        <p class="text-sm text-slate-400 mb-3">Porcellanidos / Algunos Anomuros</p>
+                        <ul class="text-xs text-slate-500 space-y-1">
+                            <li>• Abdomen acortado</li>
+                            <li>• Cefalotórax ensanchado</li>
+                            <li>• Plegado ventral</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Crab form -->
+                    <div class="diagram-item text-center group">
+                        <div class="relative mb-6">
+                            <div class="w-48 h-48 mx-auto rounded-2xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 flex items-center justify-center border border-teal-400/50 group-hover:border-teal-300/70 transition-all duration-300 shadow-lg shadow-teal-500/20">
+                                <svg class="crab-shape w-32 h-32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <!-- True crab form -->
+                                    <ellipse cx="50" cy="52" rx="30" ry="24" fill="url(#grad3)"/>
+                                    <rect x="20" y="45" width="60" height="24" rx="12" fill="url(#grad3)"/>
+                                    <ellipse cx="30" cy="38" rx="10" ry="8" fill="url(#grad3)"/>
+                                    <ellipse cx="70" cy="38" rx="10" ry="8" fill="url(#grad3)"/>
+                                    <!-- Very short folded abdomen -->
+                                    <rect x="42" y="65" width="16" height="10" rx="5" fill="url(#grad3)" opacity="0.9"/>
+                                    <!-- Claws -->
+                                    <ellipse cx="15" cy="50" rx="8" ry="12" fill="url(#grad3)" transform="rotate(-20 15 50)"/>
+                                    <ellipse cx="85" cy="50" rx="8" ry="12" fill="url(#grad3)" transform="rotate(20 85 50)"/>
+                                    <circle cx="40" cy="35" r="3" fill="#2dd4bf"/>
+                                    <circle cx="60" cy="35" r="3" fill="#2dd4bf"/>
+                                    <defs>
+                                        <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#2dd4bf;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#14b8a6;stop-opacity:1" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            </div>
+                        </div>
+                        <h4 class="text-xl font-semibold text-white mb-2">Forma Braquiuroide</h4>
+                        <p class="text-sm text-slate-400 mb-3">Cangrejos Verdaderos (Brachyura)</p>
+                        <ul class="text-xs text-slate-500 space-y-1">
+                            <li>• Abdomen muy reducido</li>
+                            <li>• Cefalotórax ancho y plano</li>
+                            <li>• Locomoción lateral eficiente</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Section 3: Guía Global y Catálogo de Especies -->
+    <section id="especies" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block px-4 py-2 glass rounded-full text-sm text-teal-400 font-medium mb-4">
+                    Biodiversidad Global
+                </span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-6 gradient-text">Guía Global y Catálogo de Especies</h2>
+                <p class="text-xl text-slate-400 max-w-3xl mx-auto">
+                    Explorando la extraordinaria diversidad de los cangrejos alrededor del mundo
+                </p>
+            </div>
+            
+            <!-- Filters and Search -->
+            <div class="glass p-6 rounded-xl mb-10">
+                <div class="flex flex-col lg:flex-row gap-6 items-center justify-between">
+                    <div class="flex-1 w-full lg:w-auto">
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input 
+                                type="text" 
+                                id="species-search" 
+                                placeholder="Buscar especie por nombre..."
+                                class="w-full pl-12 pr-4 py-3 bg-slate-800/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500/50 focus:ring-2 focus:ring-teal-500/20 transition-all"
+                            >
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 justify-center">
+                        <button class="filter-btn active px-4 py-2 rounded-lg glass text-white text-sm font-medium" data-filter="all">
+                            Todos
+                        </button>
+                        <button class="filter-btn px-4 py-2 rounded-lg glass text-white text-sm font-medium" data-filter="marinos">
+                            Marinos
+                        </button>
+                        <button class="filter-btn px-4 py-2 rounded-lg glass text-white text-sm font-medium" data-filter="terrestres">
+                            Terrestres
+                        </button>
+                        <button class="filter-btn px-4 py-2 rounded-lg glass text-white text-sm font-medium" data-filter="profundidad">
+                            De Profundidad
+                        </button>
+                        <button class="filter-btn px-4 py-2 rounded-lg glass text-white text-sm font-medium" data-filter="gigantes">
+                            Gigantes
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Species Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6" id="species-grid">
+                <!-- Species cards will be dynamically generated -->
+            </div>
+        </div>
+    </section>
+    
+    <!-- Section 4: Mapa Mundial Interactivo -->
+    <section id="mapa" class="py-24 relative bg-gradient-to-b from-slate-900/30 to-slate-950/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block px-4 py-2 glass rounded-full text-sm text-teal-400 font-medium mb-4">
+                    Distribución Global
+                </span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-6 gradient-text">Mapa Mundial Interactivo de Poblaciones</h2>
+                <p class="text-xl text-slate-400 max-w-3xl mx-auto">
+                    Explorando la distribución geográfica y el estado ecológico de los cangrejos
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 glass-strong p-6 md:p-8 rounded-2xl">
+                    <h3 class="text-xl font-semibold text-white mb-6 text-center">Distribución Mundial Real</h3>
+                    <div class="relative w-full rounded-xl overflow-hidden border border-teal-500/30 shadow-2xl shadow-teal-500/10">
+                        <div id="crab-map"></div>
+                    </div>
+                    <p class="text-xs text-slate-500 text-center mt-4">
+                        * Mapa mundial interactivo con Leaflet.js. Haga clic en los marcadores para obtener información detallada.
+                    </p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="glass p-6 rounded-xl">
+                        <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
+                            <i data-lucide="map-pin" class="w-5 h-5 mr-2 text-red-400"></i>
+                            Puntos de Interés
+                        </h4>
+                        <div class="space-y-3 text-sm">
+                            <div class="flex items-start space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-red-400 mt-1.5 flex-shrink-0"></div>
+                                <span class="text-slate-300">Isla de Navidad - Cangrejo Rojo</span>
+                            </div>
+                            <div class="flex items-start space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-red-400 mt-1.5 flex-shrink-0"></div>
+                                <span class="text-slate-300">Indo-Pacífico - Cangrejo de los Cocoteros</span>
+                            </div>
+                            <div class="flex items-start space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-red-400 mt-1.5 flex-shrink-0"></div>
+                                <span class="text-slate-300">Pacífico Oriental - Cangrejo Yeti</span>
+                            </div>
+                            <div class="flex items-start space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-red-400 mt-1.5 flex-shrink-0"></div>
+                                <span class="text-slate-300">Atlántico Norte - Cangrejo Azul & Nieve</span>
+                            </div>
+                            <div class="flex items-start space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-red-400 mt-1.5 flex-shrink-0"></div>
+                                <span class="text-slate-300">Bahía de Delaware - Cangrejo Herradura</span>
+                            </div>
+                            <div class="flex items-start space-x-2">
+                                <div class="w-2 h-2 rounded-full bg-red-400 mt-1.5 flex-shrink-0"></div>
+                                <span class="text-slate-300">Japón - Cangrejo Araña Gigante</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="glass p-6 rounded-xl">
+                        <h4 class="text-lg font-semibold text-white mb-3 flex items-center">
+                            <i data-lucide="info" class="w-5 h-5 mr-2 text-teal-400"></i>
+                            Instrucciones
+                        </h4>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Haga clic en los marcadores rojos para explorar cada región. El mapa se acercará automáticamente 
+                            y mostrará información detallada sobre la especie dominante, densidad poblacional, hábitat y amenazas.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Section 5: Impacto Socio-Cultural -->
+    <section id="sociocultural" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block px-4 py-2 glass rounded-full text-sm text-teal-400 font-medium mb-4">
+                    Humanidad y Cultura
+                </span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-6 gradient-text">Impacto Socio-Cultural y Utilidad Humana</h2>
+                <p class="text-xl text-slate-400 max-w-3xl mx-auto">
+                    Desde la gastronomía hasta la medicina avanzada y el folclor ancestral
+                </p>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="mb-8">
+                <div class="flex flex-wrap gap-2 justify-center glass p-2 rounded-xl">
+                    <button class="tab-btn active flex-1 min-w-[200px] px-6 py-3 rounded-lg text-white font-medium" data-tab="gastronomia">
+                        <i data-lucide="utensils" class="w-5 h-5 inline mr-2"></i>
+                        Gastronomía e Industria
+                    </button>
+                    <button class="tab-btn flex-1 min-w-[200px] px-6 py-3 rounded-lg text-white font-medium" data-tab="ciencia">
+                        <i data-lucide="microscope" class="w-5 h-5 inline mr-2"></i>
+                        Ciencia y Medicina
+                    </button>
+                    <button class="tab-btn flex-1 min-w-[200px] px-6 py-3 rounded-lg text-white font-medium" data-tab="cultura">
+                        <i data-lucide="book-open" class="w-5 h-5 inline mr-2"></i>
+                        Cultura y Mitología
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tab Content -->
+            <div class="glass-strong p-8 md:p-12 rounded-2xl">
+                <!-- Gastronomía -->
+                <div class="tab-content active" id="tab-gastronomia">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-display font-bold text-white mb-4">Gastronomía Mundial</h3>
+                            <p class="text-slate-300 mb-4">
+                                Los cangrejos han sido un recurso alimentario fundamental a lo largo de la historia humana. 
+                                Desde las costas mediterráneas hasta el Lejano Oriente, su carne ha sido apreciada por su 
+                                delicado sabor y textura única.
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="check-circle" class="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-slate-300"><strong class="text-white">Cangrejo azul</strong> - Base del famoso pastel de cangrejo de Maryland</span>
+                                </li>
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="check-circle" class="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-slate-300"><strong class="text-white">Cangrejo de las nieves</strong> - Muy apreciado en Japón y América del Norte</span>
+                                </li>
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="check-circle" class="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-slate-300"><strong class="text-white">Cangrejo de Dungeness</strong> - Delicia del Pacífico Noroeste</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-display font-bold text-white mb-4">Industria Pesquera</h3>
+                            <p class="text-slate-300 mb-4">
+                                La pesca de cangrejos representa una industria multimillonaria a nivel mundial. 
+                                El <strong class="text-teal-400">surimi</strong> (pasta de pescado procesada) frecuentemente 
+                                utiliza carne de cangrejo o imitaciones para productos comerciales.
+                            </p>
+                            <div class="glass p-4 rounded-lg">
+                                <h4 class="text-white font-semibold mb-2">Datos Industriales</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Captura anual mundial</span>
+                                        <span class="text-teal-400">~1.5M toneladas</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Valor económico</span>
+                                        <span class="text-teal-400">>$10 mil millones USD</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-400">Principales países</span>
+                                        <span class="text-teal-400">China, Indonesia, USA</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ciencia y Medicina -->
+                <div class="tab-content" id="tab-ciencia">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-display font-bold text-white mb-4">Sangre Azul: Un Tesoro Médico</h3>
+                            <p class="text-slate-300 mb-4">
+                                El cangrejo herradura (<em>Limulus polyphemus</em>) posee <strong class="text-blue-400">hemolinfa azul</strong> 
+                                debido a la presencia de <strong>hemocianina</strong>, una proteína que contiene cobre en lugar de hierro.
+                            </p>
+                            <p class="text-slate-300 mb-4">
+                                Esta característica única ha revolucionado la medicina moderna a través de la prueba <strong class="text-cyan-400">LAL</strong> 
+                                (<em>Limulus Amebocyte Lysate</em>).
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="shield-check" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-slate-300">Detección de endotoxinas bacterianas en vacunas</span>
+                                </li>
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="shield-check" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-slate-300">Pruebas de esterilidad en dispositivos médicos</span>
+                                </li>
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="shield-check" class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-slate-300">Salvaguarda en la producción farmacéutica</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-display font-bold text-white mb-4">Investigación Biológica</h3>
+                            <p class="text-slate-300 mb-4">
+                                Los cangrejos son organismos modelo valiosos en investigación:
+                            </p>
+                            <div class="space-y-3">
+                                <div class="glass p-4 rounded-lg">
+                                    <h4 class="text-white font-semibold mb-1">Neurobiología</h4>
+                                    <p class="text-sm text-slate-400">Estudio del sistema nervioso y visión compuesta</p>
+                                </div>
+                                <div class="glass p-4 rounded-lg">
+                                    <h4 class="text-white font-semibold mb-1">Ecología</h4>
+                                    <p class="text-sm text-slate-400">Bioindicadores de salud marina y bioturbación</p>
+                                </div>
+                                <div class="glass p-4 rounded-lg">
+                                    <h4 class="text-white font-semibold mb-1">Evolución</h4>
+                                    <p class="text-sm text-slate-400">Modelo para estudiar carcinización convergente</p>
+                                </div>
+                                <div class="glass p-4 rounded-lg">
+                                    <h4 class="text-white font-semibold mb-1">Biomateriales</h4>
+                                    <p class="text-sm text-slate-400">Quitina para aplicaciones médicas y ambientales</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cultura y Mitología -->
+                <div class="tab-content" id="tab-cultura">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-2xl font-display font-bold text-white mb-4">Astronomía y Simbolismo</h3>
+                            <p class="text-slate-300 mb-4">
+                                La constelación <strong class="text-teal-400">Cáncer</strong> (el Cangrejo) es uno de los doce signos 
+                                del zodiaco. En la mitología griega, representa al cangrejo enviado por Hera para distraer a 
+                                Hércules durante su batalla con la Hidra de Lerna.
+                            </p>
+                            <p class="text-slate-300 mb-4">
+                                Aunque pequeño en el cielo, este signo ha tenido una gran influencia en la astrología y 
+                                en la cultura occidental durante milenios.
+                            </p>
+                            <div class="glass p-4 rounded-lg border border-teal-500/30">
+                                <p class="text-sm text-slate-300 italic">
+                                    "Karkinos mordió el talón de Hércules, pero el héroe lo aplastó bajo su pie. 
+                                    Hera, agradecida, lo colocó entre las estrellas."
+                                </p>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-display font-bold text-white mb-4">Folclor Asiático</h3>
+                            <p class="text-slate-300 mb-4">
+                                En diversas culturas asiáticas, los cangrejos aparecen en leyendas y simbolismo:
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="star" class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-slate-300"><strong class="text-white">Japón</strong> - Asociados con la resurrección y la transformación</span>
+                                </li>
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="star" class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-slate-300"><strong class="text-white">China</strong> - Símbolo de tenacidad y determinación</span>
+                                </li>
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="star" class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-slate-300"><strong class="text-white">Vietnam</strong> - Protagonistas en cuentos folclóricos populares</span>
+                                </li>
+                                <li class="flex items-start space-x-3">
+                                    <i data-lucide="star" class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-slate-300"><strong class="text-white">Polinesia</strong> - Criaturas con gran significado espiritual</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Section 6: Ecología, Supervivencia y Cierre -->
+    <section id="ecologia" class="py-24 relative bg-gradient-to-b from-slate-950/50 to-slate-900/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <span class="inline-block px-4 py-2 glass rounded-full text-sm text-teal-400 font-medium mb-4">
+                    Ecosistemas Marinos
+                </span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-6 gradient-text">Ecología, Supervivencia y Cierre</h2>
+                <p class="text-xl text-slate-400 max-w-3xl mx-auto">
+                    Guardianes de los fondos marinos y maestros de la supervivencia extrema
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-8 mb-12">
+                <div class="glass-strong p-8 rounded-2xl">
+                    <h3 class="text-2xl font-display font-bold text-white mb-6 flex items-center">
+                        <i data-lucide="activity" class="w-6 h-6 mr-3 text-teal-400"></i>
+                        Rol Ecológico Fundamental
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-lg bg-slate-800/50 border-l-4 border-teal-500">
+                            <h4 class="text-white font-semibold mb-1">Bioturbación</h4>
+                            <p class="text-sm text-slate-300">
+                                Al excavar y remover sedimentos, oxigenan los fondos marinos y facilitan el reciclaje 
+                                de nutrientes, esencial para la salud del ecosistema bentónico.
+                            </p>
+                        </div>
+                        <div class="p-4 rounded-lg bg-slate-800/50 border-l-4 border-cyan-500">
+                            <h4 class="text-white font-semibold mb-1">Cadena Trófica</h4>
+                            <p class="text-sm text-slate-300">
+                                Actúan como depredadores de invertebrados y presas importantes para peces, aves marinas, 
+                                tortugas y mamíferos marinos, manteniendo el equilibrio ecológico.
+                            </p>
+                        </div>
+                        <div class="p-4 rounded-lg bg-slate-800/50 border-l-4 border-blue-500">
+                            <h4 class="text-white font-semibold mb-1">Ingenieros Ecosistémicos</h4>
+                            <p class="text-sm text-slate-300">
+                                Especialmente en manglares y praderas marinas, modifican el hábitat creando microhábitats 
+                                que benefician a numerosas especies.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-strong p-8 rounded-2xl">
+                    <h3 class="text-2xl font-display font-bold text-white mb-6 flex items-center">
+                        <i data-lucide="mountain" class="w-6 h-6 mr-3 text-amber-400"></i>
+                        Adaptaciones Extremas
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0 border border-amber-500/30">
+                                <i data-lucide="thermometer" class="w-5 h-5 text-amber-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-semibold mb-1">Ambientes Hidrotermales</h4>
+                                <p class="text-sm text-slate-300">
+                                    <em>Kiwa hirsuta</em> (cangrejo Yeti) sobrevive en temperaturas extremas cerca de 
+                                    ventilaciones hidrotermales a más de 2,000 metros de profundidad.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center flex-shrink-0 border border-red-500/30">
+                                <i data-lucide="wind" class="w-5 h-5 text-red-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-semibold mb-1">Vida Terrestre</h4>
+                                <p class="text-sm text-slate-300">
+                                    <em>Birgus latro</em> es el mayor artrópodo terrestre, capaz de trepar palmeras de 
+                                    cocotero y vivir completamente fuera del agua.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0 border border-blue-500/30">
+                                <i data-lucide="snowflake" class="w-5 h-5 text-blue-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-semibold mb-1">Aguas Frías</h4>
+                                <p class="text-sm text-slate-300">
+                                    Especies como <em>Chionoecetes opilio</em> prosperan en aguas árticas bajo el hielo, 
+                                    con adaptaciones al frío extremo.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Conservation Message -->
+            <div class="glass-strong p-8 md:p-12 rounded-2xl text-center">
+                <div class="max-w-4xl mx-auto">
+                    <i data-lucide="heart" class="w-12 h-12 text-red-400 mx-auto mb-4"></i>
+                    <h3 class="text-2xl md:text-3xl font-display font-bold text-white mb-4">Conservación y Futuro</h3>
+                    <p class="text-lg text-slate-300 mb-6 leading-relaxed">
+                        Muchos cangrejos enfrentan amenazas debido a la sobrepesca, la destrucción de hábitats costeros, 
+                        el cambio climático y la acidificación de los océanos. La conservación de estos increíbles 
+                        crustáceos es fundamental para mantener la salud de nuestros ecosistemas marinos.
+                    </p>
+                    <p class="text-teal-400 font-semibold text-lg">
+                        "Cada especie perdida es un capítulo irrecuperable de la historia evolutiva de nuestro planeta."
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="relative border-t border-teal-500/20 bg-slate-950/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                <div class="lg:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg shadow-red-500/50">
+                            <i data-lucide="crab" class="w-7 h-7 text-white"></i>
+                        </div>
+                        <span class="font-display text-2xl font-bold gradient-text">Carcinus</span>
+                    </div>
+                    <p class="text-slate-400 mb-4 max-w-md">
+                        El Universo Definitivo de los Cangrejos y la Evolución Perfecta. 
+                        Una exploración inmersiva de la biología, evolución y diversidad de estos extraordinarios crustáceos.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Navegación</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#inicio" class="text-slate-400 hover:text-teal-400 transition-colors">Inicio</a></li>
+                        <li><a href="#introduccion" class="text-slate-400 hover:text-teal-400 transition-colors">Introducción</a></li>
+                        <li><a href="#carcinizacion" class="text-slate-400 hover:text-teal-400 transition-colors">Carcinización</a></li>
+                        <li><a href="#especies" class="text-slate-400 hover:text-teal-400 transition-colors">Especies</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Explorar Más</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#mapa" class="text-slate-400 hover:text-teal-400 transition-colors">Mapa Mundial</a></li>
+                        <li><a href="#sociocultural" class="text-slate-400 hover:text-teal-400 transition-colors">Socio-Cultural</a></li>
+                        <li><a href="#ecologia" class="text-slate-400 hover:text-teal-400 transition-colors">Ecología</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-slate-800">
+                <div class="mb-6">
+                    <h5 class="text-white font-semibold mb-3 text-sm">Referencias Bibliográficas Simuladas</h5>
+                    <div class="grid md:grid-cols-2 gap-2 text-xs text-slate-500">
+                        <p>• Borradaile, L.A. (1916). "Crustacea. Part II. Porcellanopagurus: An instance of carcinization."</p>
+                        <p>• Schram, F.R. & Ng, P.K.L. (2012). "What is a crab?" Crustacean Research</p>
+                        <p>• McLaughlin, P.A. et al. (2007). "Common and Scientific Names of Aquatic Invertebrates"</p>
+                        <p>• Ng, P.K.L. et al. (2008). "Systema Brachyurorum: Part I. An annotated checklist of extant Brachyuran crabs"</p>
+                    </div>
+                </div>
+                <div class="text-center text-slate-500 text-sm">
+                    <p>&copy; 2026 Carcinus - El Universo Definitivo de los Cangrejos y la Evolución Perfecta. Diseño y Desarrollo Científico.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Species Modal -->
+    <div id="species-modal" class="modal fixed inset-0 z-[100] items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" id="modal-backdrop"></div>
+        <div class="modal-content glass-strong max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl relative z-10">
+            <div class="p-6 md:p-8">
+                <div class="flex items-start justify-between mb-6">
+                    <div>
+                        <h3 class="text-2xl md:text-3xl font-display font-bold text-white mb-2" id="modal-species-name"></h3>
+                        <p class="text-teal-400 italic" id="modal-species-scientific"></p>
+                    </div>
+                    <button id="modal-close" class="text-slate-400 hover:text-white transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="glass p-4 rounded-lg">
+                            <span class="text-sm text-slate-400">Tamaño</span>
+                            <p class="text-white font-medium" id="modal-species-size"></p>
+                        </div>
+                        <div class="glass p-4 rounded-lg">
+                            <span class="text-sm text-slate-400">Dieta</span>
+                            <p class="text-white font-medium" id="modal-species-diet"></p>
+                        </div>
+                        <div class="glass p-4 rounded-lg">
+                            <span class="text-sm text-slate-400">Hábitat</span>
+                            <p class="text-white font-medium" id="modal-species-habitat"></p>
+                        </div>
+                        <div class="glass p-4 rounded-lg">
+                            <span class="text-sm text-slate-400">Estatus UICN</span>
+                            <p class="text-white font-medium" id="modal-species-status"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="glass p-4 rounded-lg">
+                        <h4 class="text-white font-semibold mb-2">Descripción</h4>
+                        <p class="text-slate-300 text-sm leading-relaxed" id="modal-species-description"></p>
+                    </div>
+                    
+                    <div class="p-4 rounded-lg bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/30">
+                        <h4 class="text-white font-semibold mb-2 flex items-center">
+                            <i data-lucide="zap" class="w-5 h-5 mr-2 text-red-400"></i>
+                            Curiosidad Extrema
+                        </h4>
+                        <p class="text-slate-300 text-sm leading-relaxed" id="modal-species-curiosity"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        // Species Data
+        const speciesData = [
+            {
+                id: 1,
+                name: "Cangrejo de los Cocoteros",
+                scientific: "Birgus latro",
+                category: ["terrestres", "gigantes"],
+                size: "Hasta 40 cm de ancho de caparazón",
+                diet: "Omnívoro: cocos, frutas, pequeños animales",
+                habitat: "Islas tropicales del Océano Índico y Pacífico",
+                status: "Vulnerable (VU)",
+                description: "El mayor artrópodo terrestre del mundo. Capaz de trepar palmeras de coco, romper su cáscara con sus poderosas pinzas y vivir completamente fuera del agua, aunque necesita humedad para reproducirse.",
+                curiosity: "Puede levantar objetos de hasta 28 kg con sus pinzas, equivalentes a varias veces su propio peso corporal."
+            },
+            {
+                id: 2,
+                name: "Cangrejo Araña Japonés",
+                scientific: "Macrocheira kaempferi",
+                category: ["marinos", "gigantes"],
+                size: "Hasta 3.8 m entre patas",
+                diet: "Carnívoro: moluscos, peces, otros crustáceos",
+                habitat: "Fondos marinos de Japón, 50-600 m de profundidad",
+                status: "Preocupación Menor (LC)",
+                description: "El artrópodo con mayor envergadura del mundo. Posee largas patas delgadas, caparazón pequeño en comparación con su envergadura y es conocido por su longevidad.",
+                curiosity: "Puede vivir más de 100 años, lo que lo convierte en uno de los artrópodos más longevos conocidos."
+            },
+            {
+                id: 3,
+                name: "Cangrejo Yeti",
+                scientific: "Kiwa hirsuta",
+                category: ["marinos", "profundidad"],
+                size: "Hasta 15 cm de ancho de caparazón",
+                diet: "Detritívoro y bacteriófago",
+                habitat: "Fuentes hidrotermales del Pacífico Sur, >2,000 m",
+                status: "Datos Insuficientes (DD)",
+                description: "Descubierto en 2005, este cangrejo único tiene setas que albergan bacterias quimiosintéticas. Su pelaje dorado le da el apodo de 'cangrejo Yeti'.",
+                curiosity: "Cultiva bacterias en sus pinzas y las consume, una forma única de simbiosis en ambientes hidrotermales."
+            },
+            {
+                id: 4,
+                name: "Cangrejo Herradura",
+                scientific: "Limulus polyphemus",
+                category: ["marinos"],
+                size: "Hasta 60 cm longitud total",
+                diet: "Carnívoro: gusanos, moluscos, pequeños peces",
+                habitat: "Bahías y estuarios del Atlántico Norteamericano",
+                status: "Vulnerable (VU)",
+                description: "Más estrechamente relacionado con arañas y escorpiones que con cangrejos verdaderos. Considerado un fósil viviente con diseño prácticamente sin cambios por 450 millones de años.",
+                curiosity: "Su sangre azul contiene Limulus Amebocyte Lysate (LAL), usado mundialmente para detectar endotoxinas en vacunas y dispositivos médicos."
+            },
+            {
+                id: 5,
+                name: "Cangrejo Azul",
+                scientific: "Callinectes sapidus",
+                category: ["marinos"],
+                size: "Hasta 23 cm de ancho de caparazón",
+                diet: "Omnívoro oportunista",
+                habitat: "Estuarios y costas del Atlántico Occidental",
+                status: "Preocupación Menor (LC)",
+                description: "Conocido por sus pinzas azules distintivas (en machos). Es una especie comercialmente importante y un depredador clave en ecosistemas estuarinos.",
+                curiosity: "El nombre científico 'Callinectes sapidus' significa 'nadador hermoso y sabroso', reflejando su elegancia y valor gastronómico."
+            },
+            {
+                id: 6,
+                name: "Cangrejo de las Nieves",
+                scientific: "Chionoecetes opilio",
+                category: ["marinos", "gigantes"],
+                size: "Hasta 16 cm de ancho de caparazón",
+                diet: "Carnívoro: invertebrados bentónicos",
+                habitat: "Mar de Bering, Océano Ártico, 30-300 m",
+                status: "Preocupación Menor (LC)",
+                description: "Habita en aguas frías del norte. Su caparazón cubierto de pequeñas espinas y su coloración pálida le proporcionan camuflaje en fondos arenosos.",
+                curiosity: "Puede vivir en aguas con temperaturas cercanas al punto de congelación gracias a proteínas anticongelantes en su sangre."
+            }
+        ];
+        
+        // Generate particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
+                particle.style.animationDelay = Math.random() * 5 + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Mobile menu
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // Close mobile menu when clicking links
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+        
+        // Active nav link on scroll
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+        
+        const observerOptions = {
+            threshold: 0.3,
+            rootMargin: '-100px 0px -50% 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === '#' + entry.target.id) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+        }, observerOptions);
+        
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+        
+        // Generate species cards
+        function renderSpecies(filter = 'all', searchTerm = '') {
+            const grid = document.getElementById('species-grid');
+            grid.innerHTML = '';
+            
+            const filtered = speciesData.filter(species => {
+                const matchesFilter = filter === 'all' || species.category.includes(filter);
+                const matchesSearch = species.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                     species.scientific.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesFilter && matchesSearch;
+            });
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p class="text-center text-slate-400 col-span-full py-8">No se encontraron especies</p>';
+                return;
+            }
+            
+            filtered.forEach(species => {
+                const card = document.createElement('div');
+                card.className = 'glass card-hover rounded-xl overflow-hidden cursor-pointer relative';
+                card.innerHTML = `
+                    <div class="card-glow"></div>
+                    <div class="p-6 relative z-10">
+                        <div class="flex items-start justify-between mb-3">
+                            <h3 class="text-xl font-semibold text-white">${species.name}</h3>
+                            <span class="px-2 py-1 rounded text-xs ${getStatusColor(species.status)} border">
+                                ${species.status}
+                            </span>
+                        </div>
+                        <p class="text-teal-400 italic text-sm mb-4">${species.scientific}</p>
+                        <div class="space-y-2 text-sm mb-4">
+                            <div class="flex items-center text-slate-300">
+                                <i data-lucide="ruler" class="w-4 h-4 mr-2 text-slate-400"></i>
+                                ${species.size}
+                            </div>
+                            <div class="flex items-center text-slate-300">
+                                <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-slate-400"></i>
+                                ${species.habitat}
+                            </div>
+                        </div>
+                        <button class="text-teal-400 hover:text-teal-300 text-sm font-medium flex items-center">
+                            Ver detalles completos
+                            <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
+                        </button>
+                    </div>
+                `;
+                card.addEventListener('click', () => openSpeciesModal(species));
+                grid.appendChild(card);
+            });
+            
+            lucide.createIcons();
+        }
+        
+        function getStatusColor(status) {
+            if (status.includes('Vulnerable')) return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
+            if (status.includes('Preocupación')) return 'bg-green-500/20 text-green-400 border-green-500/30';
+            return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+        }
+        
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const filter = btn.dataset.filter;
+                const searchTerm = document.getElementById('species-search').value;
+                renderSpecies(filter, searchTerm);
+            });
+        });
+        
+        // Search
+        document.getElementById('species-search').addEventListener('input', (e) => {
+            const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+            renderSpecies(activeFilter, e.target.value);
+        });
+        
+        // Modal
+        function openSpeciesModal(species) {
+            document.getElementById('modal-species-name').textContent = species.name;
+            document.getElementById('modal-species-scientific').textContent = species.scientific;
+            document.getElementById('modal-species-size').textContent = species.size;
+            document.getElementById('modal-species-diet').textContent = species.diet;
+            document.getElementById('modal-species-habitat').textContent = species.habitat;
+            document.getElementById('modal-species-status').textContent = species.status;
+            document.getElementById('modal-species-description').textContent = species.description;
+            document.getElementById('modal-species-curiosity').textContent = species.curiosity;
+            
+            document.getElementById('species-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+        
+        document.getElementById('modal-close').addEventListener('click', closeModal);
+        document.getElementById('modal-backdrop').addEventListener('click', closeModal);
+        
+        function closeModal() {
+            document.getElementById('species-modal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // Real Interactive Leaflet Map
+        let crabMap;
+        
+        function initCrabMap() {
+            // Initialize map centered globally
+            crabMap = L.map('crab-map', {
+                center: [20, 0],
+                zoom: 2,
+                minZoom: 2,
+                maxZoom: 6,
+                scrollWheelZoom: true,
+                attributionControl: false
+            });
+            
+            // Add dark tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(crabMap);
+            
+            // Custom crab marker icon
+            const crabIcon = L.divIcon({
+                className: 'crab-marker',
+                html: '<div class="crab-marker-icon"></div>',
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32]
+            });
+            
+            // Crab population locations
+            const locations = [
+                {
+                    coords: [-10.5, 105.7],
+                    name: "Islas de Navidad",
+                    species: "Cangrejo Rojo de Isla de Navidad (Gecarcoidea natalis)",
+                    density: "Muy alta - Migración masiva anual (~50M individuos)",
+                    habitat: "Bosques tropicales costeros, 0-100 m altitud",
+                    temperature: "Tropical: 25-28°C",
+                    threats: "Cambio climático, aumento del nivel del mar, luces artificiales",
+                    status: "Vulnerable (VU) - Población estable pero amenazada"
+                },
+                {
+                    coords: [7.5, 134.5],
+                    name: "Atolón de Eniwetok - Indo-Pacífico",
+                    species: "Cangrejo de los Cocoteros (Birgus latro)",
+                    density: "Baja - Dispersa (1-5 individuos/km²)",
+                    habitat: "Islas coralinas, zonas ribereñas, hasta 6 km tierra adentro",
+                    temperature: "Tropical: 26-30°C",
+                    threats: "Sobreexplotación, pérdida de hábitat, depredadores introducidos",
+                    status: "Vulnerable (VU) - Declive poblacional"
+                },
+                {
+                    coords: [-18.7, -113.4],
+                    name: "Dorsal del Pacífico Oriental - Fosas Hidrotermales",
+                    species: "Cangrejo Yeti (Kiwa hirsuta)",
+                    density: "Localizada - 5-15 individuos/m² alrededor de fuentes",
+                    habitat: "Fuentes hidrotermales, 2,000-2,500 m de profundidad",
+                    temperature: "Extremo: 2-20°C (gradiente térmico extremo)",
+                    threats: "Minería submarina, acidificación oceánica, poco conocido",
+                    status: "Datos Insuficientes (DD) - Necesita mayor estudio"
+                },
+                {
+                    coords: [39.0, -76.0],
+                    name: "Bahía de Chesapeake - Costa Este EE.UU.",
+                    species: "Cangrejo Azul (Callinectes sapidus)",
+                    density: "Alta estacional - 20-40 individuos/100m²",
+                    habitat: "Estuarios salobres, bahías, 0-90 m de profundidad",
+                    temperature: "Templado: 10-28°C (estacional)",
+                    threats: "Sobrepesca, eutrofización, destrucción de praderas marinas",
+                    status: "Preocupación Menor (LC) - Bien gestionado con regulación"
+                },
+                {
+                    coords: [39.0, -75.2],
+                    name: "Bahía de Delaware - Santuario de Cangrejo Herradura",
+                    species: "Cangrejo Herradura (Limulus polyphemus)",
+                    density: "Alta en época reproductiva - 50-100 individuos/100m²",
+                    habitat: "Playas arenosas, bahías someras, 0-30 m",
+                    temperature: "Templado: 12-26°C",
+                    threats: "Recolección para LAL, pérdida de playas de desove, cambio climático",
+                    status: "Vulnerable (VU) - Protección creciente pero insuficiente"
+                },
+                {
+                    coords: [35.0, 138.0],
+                    name: "Fosa de Sagami - Costa de Japón",
+                    species: "Cangrejo Araña Japonés (Macrocheira kaempferi)",
+                    density: "Baja - Dispersa (1-3 individuos/km²)",
+                    habitat: "Fondos rocosos y fangosos, 50-600 m de profundidad",
+                    temperature: "Frío-Templado: 2-16°C",
+                    threats: "Pesca accidental, captura para acuarios, degradación bentónica",
+                    status: "Preocupación Menor (LC) - Población estable"
+                }
+            ];
+            
+            // Add markers
+            locations.forEach(loc => {
+                const marker = L.marker(loc.coords, { icon: crabIcon }).addTo(crabMap);
+                
+                const popupContent = `
+                    <div style="font-family: 'Inter', sans-serif;">
+                        <h3 style="color: #2dd4bf; font-size: 16px; font-weight: 600; margin: 0 0 8px 0; font-family: 'Playfair Display', serif;">
+                            ${loc.name}
+                        </h3>
+                        <p style="color: #38bdf8; font-style: italic; font-size: 13px; margin: 0 0 12px 0;">
+                            ${loc.species}
+                        </p>
+                        <div>
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Densidad Poblacional</span>
+                                <p style="color: #e2e8f0; font-size: 13px; margin: 2px 0 0 0;">${loc.density}</p>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Hábitat</span>
+                                <p style="color: #e2e8f0; font-size: 13px; margin: 2px 0 0 0;">${loc.habitat}</p>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Temperatura</span>
+                                <p style="color: #e2e8f0; font-size: 13px; margin: 2px 0 0 0;">${loc.temperature}</p>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <span style="color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Amenazas</span>
+                                <p style="color: #f87171; font-size: 12px; margin: 2px 0 0 0; line-height: 1.4;">${loc.threats}</p>
+                            </div>
+                            <div style="padding-top: 8px; border-top: 1px solid rgba(45, 212, 191, 0.2);">
+                                <span style="color: #94a3b8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Estado Ecológico</span>
+                                <p style="color: #2dd4bf; font-size: 12px; font-weight: 500; margin: 2px 0 0 0;">${loc.status}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent, {
+                    maxWidth: 300
+                });
+                
+                marker.on('click', () => {
+                    crabMap.flyTo(loc.coords, 4, {
+                        animate: true,
+                        duration: 1.5
+                    });
+                });
+            });
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            renderSpecies();
+            lucide.createIcons();
+            setTimeout(() => {
+                initCrabMap();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

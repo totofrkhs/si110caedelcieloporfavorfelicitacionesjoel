@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carcinus — Enciclopedia Interactiva de los Cangrejos</title>
+  <meta name="description" content="Enciclopedia digital interactiva sobre cangrejos: biología, especies, distribución, ecología, cultura y conservación, con fuentes científicas.">
+  <link rel="icon" href="assets/logo-cangrejo.jpg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <style>
+    :root{--bg:#070d19;--bg2:#0b131f;--card:#0f1a2b;--line:rgba(45,212,191,.16);--tur:#2dd4bf;--cel:#38bdf8;--red:#ef4444;--txt:#e5eef8;--mut:#94a3b8}
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font-family:Inter,system-ui,sans-serif;background:radial-gradient(ellipse at top,#10203a 0%,var(--bg) 45%,#020617 100%);color:var(--txt);line-height:1.65}
+    .font-display{font-family:"Playfair Display",serif}
+    .glass{background:rgba(11,19,31,.78);backdrop-filter:blur(14px);border:1px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.28)}
+    .card{background:linear-gradient(180deg,rgba(15,26,43,.96),rgba(10,18,31,.96));border:1px solid var(--line);border-radius:16px}
+    .nav-btn{white-space:nowrap;border-radius:10px;padding:.55rem .8rem;font-size:.86rem;color:var(--mut);transition:all .2s ease}
+    .nav-btn:hover{color:#fff;background:rgba(45,212,191,.08)}
+    .nav-btn.active{color:var(--tur);background:rgba(45,212,191,.14);box-shadow:inset 0 -2px 0 var(--tur)}
+    .view{display:none;animation:fade .28s ease}
+    .view.active{display:block}
+    @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .chip{border:1px solid var(--line);background:rgba(15,26,43,.7);color:#d7e5f5;border-radius:999px;padding:.4rem .75rem;font-size:.82rem}
+    .chip.active{background:rgba(45,212,191,.16);color:var(--tur);border-color:rgba(45,212,191,.35)}
+    .btn{display:inline-flex;align-items:center;gap:.45rem;border-radius:10px;padding:.65rem 1rem;font-weight:600}
+    .btn-primary{background:linear-gradient(135deg,var(--red),#dc2626);color:#fff}
+    .btn-ghost{border:1px solid var(--line);color:#dce8f5;background:rgba(15,26,43,.55)}
+    .muted{color:var(--mut)} .accent{color:var(--tur)}
+    .source a{color:var(--cel);text-decoration:underline;text-underline-offset:2px}
+    #map{height:520px;border-radius:16px;border:1px solid var(--line)}
+    .leaflet-container{background:#06101d}
+    .leaflet-tile{filter:brightness(.52) contrast(1.25) saturate(.65) hue-rotate(175deg)}
+    .leaflet-popup-content-wrapper{background:rgba(10,18,31,.96);color:var(--txt);border:1px solid var(--line);border-radius:12px}
+    .leaflet-popup-tip{background:rgba(10,18,31,.96)}
+    .timeline-step{cursor:pointer;border:1px solid var(--line);border-radius:14px;padding:1rem;background:rgba(15,26,43,.55);transition:.2s}
+    .timeline-step.active,.timeline-step:hover{border-color:rgba(45,212,191,.4);background:rgba(45,212,191,.08)}
+    .detail-hero{background:linear-gradient(135deg,rgba(45,212,191,.12),rgba(239,68,68,.08));border:1px solid var(--line);border-radius:18px}
+    .skeleton{background:linear-gradient(90deg,rgba(148,163,184,.08),rgba(148,163,184,.16),rgba(148,163,184,.08));background-size:200% 100%;animation:sh 1.4s infinite}
+    @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+    .mobile-nav{display:none}
+    @media (max-width: 1023px){.desktop-nav{display:none}.mobile-nav{display:block} #map{height:380px}}
+    table{width:100%;border-collapse:collapse} th,td{padding:.55rem .6rem;border-bottom:1px solid var(--line);text-align:left;vertical-align:top} th{color:#cfe3f7;font-weight:600}
+    .prose-like h3{font-family:'Inter',sans-serif;font-size:1.25rem;font-weight:700;color:#eaf4ff;margin:1.6rem 0 .55rem;padding-bottom:.35rem;border-bottom:1px solid var(--line)}
+    .prose-like h4{font-weight:650;color:#d9ecff;margin:1.1rem 0 .35rem}
+    .prose-like p{margin:.55rem 0}
+    .prose-like ul,.prose-like ol{margin:.55rem 0 .9rem;padding-left:1.25rem}
+    .prose-like li{margin:.35rem 0}
+    .prose-like blockquote{border-left:3px solid var(--tur);padding:.55rem .9rem;margin:.9rem 0;background:rgba(45,212,191,.06);border-radius:0 10px 10px 0}
+    .prose-like a{color:var(--cel);text-decoration:underline;text-underline-offset:2px}
+    .kbd{font-size:.75rem;border:1px solid var(--line);padding:.1rem .35rem;border-radius:6px;color:var(--mut)}
+  </style>
+</head>
+<body>
+  <header class="sticky top-0 z-50 glass">
+    <div class="max-w-7xl mx-auto px-4 py-3">
+      <div class="flex items-center justify-between gap-3">
+        <button class="flex items-center gap-3 text-left" onclick="showTab('inicio')" aria-label="Ir al inicio">
+          <span class="inline-flex items-center justify-center rounded-xl bg-[#091423] border border-[var(--line)] p-1.5" style="height:48px">
+            <img src="assets/logo-cangrejo.jpg" alt="Logotipo Carcinus" style="height:36px;width:auto;max-width:120px;object-fit:contain;display:block" referrerpolicy="no-referrer">
+          </span>
+          <span>
+            <span class="block font-display text-xl font-bold leading-none">Carcinus</span>
+            <span class="block text-xs muted">Enciclopedia interactiva de los cangrejos</span>
+          </span>
+        </button>
+        <nav class="desktop-nav flex items-center gap-1 overflow-x-auto" aria-label="Navegación principal">
+          <button class="nav-btn active" data-tab="inicio" onclick="showTab('inicio')">Inicio</button>
+          <button class="nav-btn" data-tab="catalogo" onclick="showTab('catalogo')">Guía y catálogo</button>
+          <button class="nav-btn" data-tab="mapa" onclick="showTab('mapa')">Mapa global</button>
+          <button class="nav-btn" data-tab="gastronomia" onclick="showTab('gastronomia')">Gastronomía</button>
+          <button class="nav-btn" data-tab="ciencia" onclick="showTab('ciencia')">Ciencia y medicina</button>
+          <button class="nav-btn" data-tab="cultura" onclick="showTab('cultura')">Cultura y mitología</button>
+          <button class="nav-btn" data-tab="ecologia" onclick="showTab('ecologia')">Ecología</button>
+          <button class="nav-btn" data-tab="conservacion" onclick="showTab('conservacion')">Conservación</button>
+        </nav>
+        <div class="mobile-nav">
+          <label class="sr-only" for="mobileTab">Sección</label>
+          <select id="mobileTab" class="chip" onchange="showTab(this.value)">
+            <option value="inicio">Inicio</option>
+            <option value="catalogo">Guía y catálogo</option>
+            <option value="mapa">Mapa global</option>
+            <option value="gastronomia">Gastronomía</option>
+            <option value="ciencia">Ciencia y medicina</option>
+            <option value="cultura">Cultura y mitología</option>
+            <option value="ecologia">Ecología</option>
+            <option value="conservacion">Conservación</option>
+          </select>
+        </div>
+      </div>
+      <div id="breadcrumbs" class="mt-2 text-sm muted hidden"></div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <!-- INICIO -->
+    <section id="view-inicio" class="view active" data-title="Inicio e introducción">
+      <div class="card p-6 md:p-10 mb-8">
+        <p class="accent font-semibold mb-2">Plataforma de divulgación científica</p>
+        <h1 class="font-display text-4xl md:text-6xl font-bold leading-tight mb-4">El mundo de los cangrejos</h1>
+        <p class="text-lg muted max-w-4xl">Los cangrejos verdaderos son crustáceos decápodos del infraorden Brachyura. Presentan un cuerpo compacto, abdomen reducido plegado bajo el cefalotórax y, en la mayoría de las especies, un primer par de patas transformado en pinzas. Esta enciclopedia reúne información biológica, taxonómica, ecológica y cultural con fuentes identificables.</p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <button class="btn btn-primary" onclick="showTab('catalogo')">Explorar catálogo</button>
+          <button class="btn btn-ghost" onclick="showTab('mapa')">Ver mapa global</button>
+        </div>
+        <p class="mt-4 text-xs muted source">Fuentes generales: <a href="https://www.marinespecies.org/" target="_blank" rel="noopener">WoRMS</a>, <a href="https://www.decanet.info/" target="_blank" rel="noopener">DecaNet</a>, <a href="https://www.crabdatabase.info/" target="_blank" rel="noopener">Crab Database</a>.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+        <article class="card p-5 cursor-pointer hover:border-[rgba(45,212,191,.35)] transition" onclick="openArticle('exoesqueleto')">
+          <h2 class="text-xl font-semibold mb-2">Exoesqueleto protector</h2>
+          <p class="muted text-sm">Quitina, mineralización, protección y muda (ecdisis). Abrir detalle.</p>
+        </article>
+        <article class="card p-5 cursor-pointer hover:border-[rgba(45,212,191,.35)] transition" onclick="openArticle('respiracion')">
+          <h2 class="text-xl font-semibold mb-2">Sistema respiratorio</h2>
+          <p class="muted text-sm">Branquias, cámara branquial e intercambio gaseoso. Abrir detalle.</p>
+        </article>
+        <article class="card p-5 cursor-pointer hover:border-[rgba(45,212,191,.35)] transition" onclick="openArticle('sentidos')">
+          <h2 class="text-xl font-semibold mb-2">Órganos sensoriales</h2>
+          <p class="muted text-sm">Visión, antenas, quimiorrecepción y vibraciones. Abrir detalle.</p>
+        </article>
+        <article class="card p-5 cursor-pointer hover:border-[rgba(45,212,191,.35)] transition" onclick="openArticle('morfologia')">
+          <h2 class="text-xl font-semibold mb-2">Morfología interactiva</h2>
+          <p class="muted text-sm">Explora estructuras anatómicas y diferencias entre especies.</p>
+        </article>
+      </div>
+
+      <div class="card p-6 md:p-8 mb-8" id="morfologia-panel">
+        <div class="mb-5">
+          <h2 class="font-display text-3xl font-bold">Morfología característica</h2>
+          <p class="muted">Explora las estructuras anatómicas de los cangrejos. La información es general sobre Brachyura y decápodos relacionados; se indican variaciones relevantes entre grupos cuando corresponde. Esta sección no compara especies mediante selectores.</p>
+        </div>
+        <div class="grid lg:grid-cols-[280px,1fr] gap-5">
+          <div id="morphList" class="space-y-2" aria-label="Estructuras anatómicas"></div>
+          <div id="morphDetail" class="card p-5 bg-transparent"></div>
+        </div>
+      </div>
+
+      <div class="card p-6 md:p-8">
+        <h2 class="font-display text-3xl font-bold mb-2">Ciclo vital</h2>
+        <p class="muted mb-3">Secuencia visual de etapas. Las fotografías se usan cuando están disponibles; la zoea se muestra con una ilustración científica histórica de Ernst Haeckel porque no se encontró una fotografía libre que pudiéramos verificar para esa etapa concreta. La megalopa es una fotografía de un braquiuro no identificado. No se usa una foto de adulto para simular una larva.</p>
+        <p class="muted mb-5">Las etapas generales de muchos braquiuros marinos incluyen huevo, zoea, megalopa, juvenil y adulto, pero la presencia de fases larvarias, su duración y el tipo de desarrollo varían según la especie (incluido el desarrollo directo en algunos cangrejos de agua dulce o terrestres). Verifica siempre la identificación taxonómica y la licencia en la ficha de cada imagen.</p>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4" id="lifeTimeline"></div>
+        <div id="lifeDetail" class="card p-5 bg-transparent"></div>
+        <p class="mt-4 text-xs muted source">Fuente orientativa: descripciones generales de desarrollo en decápodos en <a href="https://www.marinespecies.org/" target="_blank" rel="noopener">WoRMS</a> y literatura de carcinología; verificar cada especie en su ficha.</p>
+      </div>
+    </section>
+
+    <!-- CATÁLOGO -->
+    <section id="view-catalogo" class="view" data-title="Guía global y catálogo de especies">
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
+        <div>
+          <h2 class="font-display text-4xl font-bold">Guía global y catálogo</h2>
+          <p class="muted max-w-3xl">Catálogo curado con especies documentadas y enlaces a fuentes. Incluye búsqueda por nombre común/científico, filtros y fichas individuales. Los nombres científicos deben validarse en <a class="accent underline" href="https://www.marinespecies.org/" target="_blank" rel="noopener">WoRMS</a>/DecaNet para sinonimias y estatus aceptado.</p>
+        </div>
+        <div class="text-sm muted" id="catalogCount"></div>
+      </div>
+      <div class="card p-4 md:p-5 mb-5">
+        <div class="grid md:grid-cols-2 xl:grid-cols-5 gap-3">
+          <input id="qCommon" class="chip w-full" placeholder="Buscar nombre común" oninput="applyCatalogFilters()">
+          <input id="qSci" class="chip w-full" placeholder="Buscar nombre científico" oninput="applyCatalogFilters()">
+          <select id="qHabitat" class="chip w-full" onchange="applyCatalogFilters()">
+            <option value="all">Todos los hábitats</option>
+            <option value="marino">Marinos</option>
+            <option value="terrestre">Terrestres</option>
+            <option value="agua dulce">Agua dulce</option>
+            <option value="aguas profundas">Aguas profundas</option>
+          </select>
+          <select id="qRegion" class="chip w-full" onchange="applyCatalogFilters()"><option value="all">Todas las regiones</option></select>
+          <select id="qSort" class="chip w-full" onchange="applyCatalogFilters()">
+            <option value="az">Orden alfabético (común)</option>
+            <option value="sci">Orden alfabético (científico)</option>
+            <option value="family">Familia</option>
+          </select>
+        </div>
+        <div class="flex flex-wrap gap-2 mt-4">
+          <button class="chip active" data-filter="all" onclick="setQuickFilter(this,'all')">Todas</button>
+          <button class="chip" data-filter="marino" onclick="setQuickFilter(this,'marino')">Marinos</button>
+          <button class="chip" data-filter="terrestre" onclick="setQuickFilter(this,'terrestre')">Terrestres</button>
+          <button class="chip" data-filter="agua dulce" onclick="setQuickFilter(this,'agua dulce')">Agua dulce</button>
+          <button class="chip" data-filter="aguas profundas" onclick="setQuickFilter(this,'aguas profundas')">Aguas profundas</button>
+          <button class="chip" data-filter="gigante" onclick="setQuickFilter(this,'gigante')">Gigantes</button>
+          <button class="chip" data-filter="interes" onclick="setQuickFilter(this,'interes')">Interés particular</button>
+        </div>
+      </div>
+      <div id="catalogGrid" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+      <div class="flex items-center justify-between mt-6 gap-3 flex-wrap">
+        <button class="btn btn-ghost" onclick="changePage(-1)">Anterior</button>
+        <div id="pageInfo" class="muted text-sm"></div>
+        <button class="btn btn-ghost" onclick="changePage(1)">Siguiente</button>
+      </div>
+      <div class="card p-5 mt-6 source text-sm muted">
+        <strong class="text-white">Fuentes del catálogo y validación taxonómica:</strong>
+        <a href="https://www.decanet.info/" target="_blank" rel="noopener">DecaNet</a> ·
+        <a href="https://www.marinespecies.org/" target="_blank" rel="noopener">WoRMS</a> ·
+        <a href="https://www.crabdatabase.info/" target="_blank" rel="noopener">Crab Database</a> ·
+        <a href="https://www.gbif.org/" target="_blank" rel="noopener">GBIF</a> ·
+        <a href="https://obis.org/" target="_blank" rel="noopener">OBIS</a> ·
+        <a href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a> ·
+        <a href="http://www.boldsystems.org/" target="_blank" rel="noopener">BOLD Systems</a>.
+        <p class="mt-2">Nota: este archivo HTML funciona sin backend. Para un catálogo exhaustivo de miles de especies, se recomienda integrar consultas paginadas a APIs (WoRMS/DecaNet/GBIF) desde un servicio intermediario que gestione límites y credenciales cuando aplique.</p>
+      </div>
+    </section>
+
+    <!-- MAPA -->
+    <section id="view-mapa" class="view" data-title="Mapa global">
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
+        <div>
+          <h2 class="font-display text-4xl font-bold">Mapa global interactivo</h2>
+          <p class="muted max-w-3xl">Visualiza registros georreferenciados (puntos de observación/ocurrencia), no límites completos de distribución. Los datos pueden consultarse desde GBIF; si hay límites de red/CORS, se muestran registros curados de respaldo.</p>
+        </div>
+      </div>
+      <div class="card p-4 mb-4">
+        <div class="grid md:grid-cols-2 xl:grid-cols-5 gap-3">
+          <input id="mapQuery" class="chip w-full" placeholder="Nombre científico (ej. Carcinus maenas)">
+          <select id="mapHabitat" class="chip w-full" onchange="filterMapMarkers()">
+            <option value="all">Todos los hábitats</option>
+            <option value="marino">Marino</option>
+            <option value="terrestre">Terrestre</option>
+            <option value="agua dulce">Agua dulce</option>
+            <option value="aguas profundas">Aguas profundas</option>
+          </select>
+          <button class="btn btn-primary" onclick="loadGbifOccurrences()">Buscar en GBIF</button>
+          <button class="btn btn-ghost" onclick="loadFallbackMap()">Usar registros curados</button>
+          <button class="btn btn-ghost" onclick="resetMap()">Restablecer mapa</button>
+        </div>
+        <div id="mapStatus" class="text-sm muted mt-3">Listo. Puedes cargar registros curados o buscar ocurrencias en GBIF por nombre científico.</div>
+      </div>
+      <div id="map"></div>
+      <div class="card p-4 mt-4 text-sm muted source">
+        <strong class="text-white">Leyenda:</strong> cada marcador representa un registro georreferenciado. La agrupación (clusters) resume zonas con múltiples registros. Fuentes geográficas: <a href="https://www.gbif.org/" target="_blank" rel="noopener">GBIF</a>, <a href="https://obis.org/" target="_blank" rel="noopener">OBIS</a>, <a href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a>. Mapa base © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.
+      </div>
+    </section>
+
+    <!-- GASTRONOMÍA -->
+    <section id="view-gastronomia" class="view" data-title="Gastronomía e industria">
+      <h2 class="font-display text-4xl font-bold mb-2">Gastronomía e industria</h2>
+      <p class="muted mb-6 max-w-4xl">Lista de temas y artículos. Selecciona un elemento para abrir una vista individual con desarrollo ampliado. Las cifras comerciales cambian con el tiempo; verifica estadísticas, años y procedencia en FAO, NOAA Fisheries y fuentes sectoriales antes de citarlas.</p>
+      <div id="gastronomiaList" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+      <p class="text-sm muted mt-6 source">Fuentes de investigación: <a href="https://www.fao.org/" target="_blank" rel="noopener">FAO</a>, <a href="https://www.fao.org/fishery/" target="_blank" rel="noopener">FAO Fisheries and Aquaculture</a>, <a href="https://www.fisheries.noaa.gov/" target="_blank" rel="noopener">NOAA Fisheries</a>, <a href="https://www.sciencedirect.com/" target="_blank" rel="noopener">ScienceDirect</a>, <a href="https://scholar.google.com/" target="_blank" rel="noopener">Google Académico</a>, <a href="https://www.frontiersin.org/journals/marine-science" target="_blank" rel="noopener">Frontiers in Marine Science</a>.</p>
+    </section>
+
+    <!-- CIENCIA -->
+    <section id="view-ciencia" class="view" data-title="Ciencia y medicina">
+      <h2 class="font-display text-4xl font-bold mb-2">Ciencia y medicina</h2>
+      <div class="card p-6 mb-5 border-l-4 border-l-[var(--tur)]">
+        <h3 class="text-2xl font-semibold mb-2">Propiedades medicinales y aplicaciones biomédicas</h3>
+        <p class="muted text-sm max-w-4xl mb-4">Los cangrejos y otros crustáceos aportan materiales y moléculas que se estudian en medicina y biotecnología. La clave es no confundir un resultado de laboratorio con un tratamiento aprobado. Esta sección separa tres niveles: aplicaciones con respaldo clínico o regulatorio, líneas de investigación en curso e hipótesis experimentales.</p>
+        <div class="grid lg:grid-cols-3 gap-4 text-sm mb-5">
+          <div class="p-4 rounded-xl border border-[var(--line)] bg-[#08131b]">
+            <div class="text-xs accent font-semibold mb-1">Nivel 1</div>
+            <h4 class="font-semibold text-white mb-2">Uso clínico o regulatorio</h4>
+            <p class="muted">Algunos productos de quitosano se comercializan como dispositivos médicos o apósitos en determinadas jurisdicciones. Su indicación, eficacia y evidencia dependen del producto concreto; no se extrapolan a todo el material ni a todos los cangrejos.</p>
+          </div>
+          <div class="p-4 rounded-xl border border-[var(--line)] bg-[#08131b]">
+            <div class="text-xs accent font-semibold mb-1">Nivel 2</div>
+            <h4 class="font-semibold text-white mb-2">Investigación en curso</h4>
+            <p class="muted">Nanopartículas, hidrogeles, apósitos, andamios y sistemas de liberación de fármacos se investigan en modelos preclínicos y algunos ensayos. Los resultados son prometedores en ciertos contextos, pero no equivalen a una recomendación terapéutica.</p>
+          </div>
+          <div class="p-4 rounded-xl border border-[var(--line)] bg-[#08131b]">
+            <div class="text-xs accent font-semibold mb-1">Nivel 3</div>
+            <h4 class="font-semibold text-white mb-2">Hipótesis experimental</h4>
+            <p class="muted">Compuestos bioactivos, péptidos, pigmentos y extractos se estudian in vitro o en modelos animales. Una actividad observada en laboratorio no demuestra eficacia ni seguridad en humanos.</p>
+          </div>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-4 text-sm muted">
+          <div>
+            <h4 class="font-semibold text-white mb-2">Quitina y quitosano</h4>
+            <p class="mb-2">La <strong class="text-white">quitina</strong> es un polisacárido estructural del exoesqueleto. El <strong class="text-white">quitosano</strong> se obtiene por desacetilación y sus propiedades dependen del grado de desacetilación, peso molecular, pureza y formulación. Se investigan apósitos, hidrogeles, andamios, recubrimientos y vehículos de fármacos. También existen aplicaciones industriales y ambientales, no solo médicas.</p>
+            <h4 class="font-semibold text-white mb-2">Compuestos bioactivos</h4>
+            <p>Se estudian péptidos, proteínas, carotenoides y otros compuestos obtenidos de crustáceos. La evidencia varía según el compuesto, la dosis, el modelo y la vía de administración. No debe afirmarse que consumir cangrejo cura enfermedades ni que un extracto es un medicamento.</p>
+          </div>
+          <div>
+            <h4 class="font-semibold text-white mb-2">Qué no se puede afirmar</h4>
+            <ul class="list-disc pl-5 space-y-1">
+              <li>Que el cangrejo o el quitosano “curan” heridas, cáncer o infecciones sin ensayos clínicos específicos.</li>
+              <li>Que una actividad in vitro se traduce automáticamente en un tratamiento humano.</li>
+              <li>Que todos los productos de quitosano son equivalentes.</li>
+              <li>Que los cangrejos herradura son crustáceos o cangrejos verdaderos.</li>
+            </ul>
+            <div class="mt-4 p-4 rounded-xl border border-[rgba(239,68,68,.35)] bg-[rgba(239,68,68,.06)]">
+              <h4 class="font-semibold text-white mb-1">Nota taxonómica: cangrejos herradura</h4>
+              <p>Los cangrejos herradura son <strong class="text-white">quelicerados</strong>, no crustáceos ni cangrejos verdaderos. Su hemolinfa se ha utilizado históricamente en el ensayo LAL para detectar endotoxinas bacterianas. Su importancia biomédica se explica aparte, junto con el desarrollo de alternativas recombinantes y las preocupaciones de conservación.</p>
+            </div>
+            <p class="mt-3 source text-xs">Fuentes: <a href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank" rel="noopener">PubMed</a>, <a href="https://www.ncbi.nlm.nih.gov/" target="_blank" rel="noopener">National Library of Medicine</a>, <a href="https://www.nature.com/" target="_blank" rel="noopener">Nature</a>, <a href="https://www.mdpi.com/journal/marinedrugs" target="_blank" rel="noopener">MDPI Marine Drugs</a>, <a href="https://www.sciencedirect.com/" target="_blank" rel="noopener">ScienceDirect</a>.</p>
+          </div>
+        </div>
+      </div>
+      <div class="grid lg:grid-cols-2 gap-5">
+        <div class="card p-5">
+          <h3 class="text-xl font-semibold mb-4">Artículos científicos</h3>
+          <div id="scienceArticles" class="space-y-3"></div>
+        </div>
+        <div class="card p-5">
+          <h3 class="text-xl font-semibold mb-4">Avances científicos</h3>
+          <div id="scienceAdvances" class="space-y-3"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CULTURA -->
+    <section id="view-cultura" class="view" data-title="Cultura y mitología">
+      <h2 class="font-display text-4xl font-bold mb-2">Cultura y mitología</h2>
+      <p class="muted mb-6 max-w-4xl">Temas históricos, artísticos y culturales. Cada tarjeta abre un artículo individual con contexto, desarrollo, interpretaciones, fuentes y referencias. Las interpretaciones modernas se diferencian de la evidencia histórica.</p>
+      <div id="culturaList" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+      <p class="text-sm muted mt-6 source">Fuentes: <a href="https://www.theoi.com/" target="_blank" rel="noopener">Theoi</a>, <a href="https://www.worldhistory.org/" target="_blank" rel="noopener">World History Encyclopedia</a>, <a href="https://www.jstor.org/" target="_blank" rel="noopener">JSTOR</a>, <a href="https://scholar.google.com/" target="_blank" rel="noopener">Google Académico</a>, <a href="https://archive.org/" target="_blank" rel="noopener">Internet Archive</a>, <a href="https://scielo.org/" target="_blank" rel="noopener">SciELO</a>, <a href="https://www.metmuseum.org/" target="_blank" rel="noopener">The Met</a>, <a href="https://www.frontiersin.org/journals/marine-science/articles/10.3389/fmars.2025.1556758/full" target="_blank" rel="noopener">Frontiers (culturas/simbolismo)</a>, <a href="https://www.scielo.sa.cr/scielo.php?pid=S0034-77442025000200008&script=sci_arttext" target="_blank" rel="noopener">SciELO (precolombino)</a>.</p>
+    </section>
+
+    <!-- ECOLOGÍA -->
+    <section id="view-ecologia" class="view" data-title="Ecología y supervivencia">
+      <h2 class="font-display text-4xl font-bold mb-2">Ecología y supervivencia</h2>
+      <p class="muted mb-6 max-w-4xl">Historia evolutiva, funciones ecológicas, adaptaciones, relaciones y cambio climático. Los efectos documentados se distinguen de preguntas abiertas de investigación. Evita cronologías con fechas especulativas sin respaldo.</p>
+      <div id="ecologiaList" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+      <p class="text-sm muted mt-6 source">Fuentes: <a href="https://ocean.si.edu/" target="_blank" rel="noopener">Smithsonian Ocean</a>, <a href="https://oceanservice.noaa.gov/" target="_blank" rel="noopener">NOAA Ocean Service</a>, <a href="https://www.marinebio.org/" target="_blank" rel="noopener">MarineBio</a>, <a href="https://animaldiversity.org/" target="_blank" rel="noopener">Animal Diversity Web</a>, <a href="https://eol.org/" target="_blank" rel="noopener">EOL</a>, <a href="https://www.marinespecies.org/" target="_blank" rel="noopener">WoRMS</a>, <a href="https://www.iucnredlist.org/" target="_blank" rel="noopener">IUCN</a>.</p>
+    </section>
+
+    <!-- CONSERVACIÓN -->
+    <section id="view-conservacion" class="view" data-title="Conservación y futuro">
+      <h2 class="font-display text-4xl font-bold mb-2">Conservación de las especies</h2>
+      <p class="muted mb-6 max-w-4xl">Consulta por amenazas, categorías oficiales UICN, medidas y organizaciones. No se asignan categorías por estimación; “Datos Insuficientes” no equivale a “amenazada”. Comprueba la evaluación vigente y su fecha en UICN.</p>
+      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+        <div class="card p-4"><div class="text-sm accent font-semibold">Amenazas</div><div class="muted text-sm">Sobrepesca, hábitat, clima, contaminación.</div></div>
+        <div class="card p-4"><div class="text-sm accent font-semibold">Categorías UICN</div><div class="muted text-sm">EX a NE, con definición y siglas.</div></div>
+        <div class="card p-4"><div class="text-sm accent font-semibold">Medidas</div><div class="muted text-sm">Protección, regulación, restauración, monitoreo.</div></div>
+        <div class="card p-4"><div class="text-sm accent font-semibold">Organizaciones</div><div class="muted text-sm">IUCN, WWF, CBD, CITES, FAO, etc.</div></div>
+      </div>
+      <div class="card p-4 mb-3 flex flex-wrap gap-3 items-center">
+        <label class="text-sm muted">Filtrar fichas con categoría UICN verificada:</label>
+        <select id="iucnFilter" class="chip" onchange="renderConservation()"><option value="all">Todas</option><option>EX</option><option>EW</option><option>CR</option><option>EN</option><option>VU</option><option>NT</option><option>LC</option><option>DD</option><option>NE</option></select>
+      </div>
+      <p class="text-xs muted mb-5">El filtro se aplica solo a fichas de especies con categoría comprobada. Las tarjetas metodológicas generales se ocultan al seleccionar una categoría. Una categoría vacía no significa que no existan especies amenazadas: significa que no hay una ficha verificada en esta selección.</p>
+      <div id="conservacionList" class="grid md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- DETALLE -->
+    <section id="view-detail" class="view" data-title="Detalle">
+      <div class="flex items-center gap-2 mb-4">
+        <button class="btn btn-ghost" onclick="goBack()">← Volver</button>
+        <span id="detailCrumb" class="text-sm muted"></span>
+      </div>
+      <div id="detailContent"></div>
+    </section>
+  </main>
+
+  <footer class="max-w-7xl mx-auto px-4 pb-10 text-sm muted">
+    <div class="card p-5">
+      <p><strong class="text-white">Carcinus</strong> — enciclopedia interactiva educativa. La información se presenta con fines divulgativos; para investigación formal, verificar siempre las fuentes primarias y el estado taxonómico/conservación actualizado.</p>
+    </div>
+  </footer>
+
+  <script>
+    // ---------- Datos curados (verificables) ----------
+    // Imágenes: Wikimedia Commons (Special:FilePath). Verificar licencia/atribución en la página del archivo.
+    const SPECIES = [
+      sp({id:'carcinus-maenas',common:'Cangrejo verde europeo',scientific:'Carcinus maenas',family:'Carcinidae',habitats:['marino'],region:'Atlántico noreste; introducido en varias regiones',iucn:'Consultar ficha actualizada (UICN/GBIF)',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=107381','https://www.gbif.org/species/5178554','https://commons.wikimedia.org/wiki/File:Carcinus_maenas.jpg'],desc:'Especie costera ampliamente estudiada; en muchas áreas fuera de su rango nativo se considera invasora. Confirmar distribución e impactos con fuentes regionales.',size:'Ancho de caparazón variable; consultar literatura/WoRMS.',diet:'Omnívoro oportunista (según localidad).',ecology:'Puede afectar comunidades bentónicas donde se establece fuera de su rango.',coords:[[50.8,-1.3],[41.5,-71.3],[37.8,-122.4]],image:'https://commons.wikimedia.org/wiki/Special:FilePath/Carcinus%20maenas.jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia en el archivo fuente.'}),
+      sp({id:'callinectes-sapidus',common:'Cangrejo azul',scientific:'Callinectes sapidus',family:'Portunidae',habitats:['marino'],region:'Atlántico occidental; estuarios y costas',iucn:'Consultar ficha actualizada',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=107379','https://www.fao.org/fishery/en/aqspecies/2632/en','https://commons.wikimedia.org/wiki/File:Blue_crab_on_market_in_Piraeus_-_Callinectes_sapidus_Rathbun_20020819-317.jpg'],desc:'Portúnido nadador de importancia pesquera y gastronómica regional.',size:'Hasta ~23 cm de ancho de caparazón (referencias generales; verificar).',diet:'Omnívoro.',ecology:'Depredador/carroñero en estuarios.',coords:[[38.9,-76.4],[29.9,-90.1],[36.8,-75.9]],image:'https://commons.wikimedia.org/wiki/Special:FilePath/Blue%20crab%20on%20market%20in%20Piraeus%20-%20Callinectes%20sapidus%20Rathbun%2020020819-317.jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'chionoecetes-opilio',common:'Cangrejo de las nieves',scientific:'Chionoecetes opilio',family:'Oregoniidae',habitats:['marino','aguas profundas'],region:'Atlántico noroeste y Pacífico norte',iucn:'Consultar ficha actualizada',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=107315','https://www.fao.org/fishery/en/aqspecies/2644/en','https://commons.wikimedia.org/wiki/File:Chionoecetes_opilio(Kasukabe).jpg'],desc:'Especie de aguas frías con importancia comercial.',size:'Variable; machos generalmente mayores (ver fuentes pesqueras).',diet:'Invertebrados bentónicos y otros recursos (variable).',ecology:'Parte de ecosistemas bentónicos de plataforma/talud según región.',coords:[[56.5,-170.5],[52.0,-52.0]],giant:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Blue%20Chionoecetes%20opilio.JPG?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'macrocheira-kaempferi',common:'Cangrejo araña japonés',scientific:'Macrocheira kaempferi',family:'Inachidae',habitats:['marino','aguas profundas'],region:'Aguas de Japón',iucn:'Consultar evaluación/registros actuales',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=346131','https://www.gbif.org/species/2225460','https://commons.wikimedia.org/wiki/File:Macrocheira_kaempferi.jpg'],desc:'Conocido por su gran envergadura de patas. Los datos de longevidad/talla máxima deben citarse con cuidado.',size:'Gran envergadura; medidas máximas dependen de la fuente.',diet:'Omnívoro/carroñero (según observaciones).',ecology:'Habitante bentónico de profundidades variables.',coords:[[34.5,138.8],[35.0,139.5]],giant:true,interest:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Macrocheira%20kaempferi.jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'birgus-latro',common:'Cangrejo de los cocoteros',scientific:'Birgus latro',family:'Coenobitidae',habitats:['terrestre'],region:'Islas del Indo-Pacífico',iucn:'Vulnerable (VU) — verificar evaluación vigente en UICN',sources:['https://www.iucnredlist.org/species/2811/126813586','https://www.marinespecies.org/aphia.php?p=taxdetails&id=208668','https://commons.wikimedia.org/wiki/File:Birgus_latro_(Bora-Bora).jpg'],desc:'Gran artrópodo terrestre adaptado a vida en tierra; depende del mar para fases tempranas del ciclo de vida.',size:'Grande para un artrópodo terrestre; verificar medidas en UICN/literatura.',diet:'Omnívoro; consume material vegetal y otros recursos.',ecology:'Importante en islas; vulnerable a sobreexplotación y pérdida de hábitat.',coords:[[7.5,134.6],[-10.4,105.7]],giant:true,interest:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Birgus%20latro%20(Bora-Bora).jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'gecarcinus-lateralis',common:'Cangrejo terrestre de espalda negra',scientific:'Gecarcinus lateralis',family:'Gecarcinidae',habitats:['terrestre'],region:'Bermudas, Florida, Caribe y costas cercanas',iucn:'Consultar evaluación actual',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=422183','https://www.gbif.org/species/2225796','https://commons.wikimedia.org/wiki/File:Gecarcinus_lateralis_2.jpg'],desc:'Cangrejo terrestre de madrigueras; asociado a zonas costeras.',size:'Variable; consultar fuentes.',diet:'Principalmente material vegetal/detritos (variable).',ecology:'Ingeniero del suelo en hábitats costeros.',coords:[[24.6,-81.8],[18.4,-66.1]],image:'https://commons.wikimedia.org/wiki/Special:FilePath/Gecarcinus%20lateralis%202.jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'cardisoma-guanhumi',common:'Cangrejo azul terrestre',scientific:'Cardisoma guanhumi',family:'Gecarcinidae',habitats:['terrestre'],region:'Atlántico occidental tropical/subtropical',iucn:'Consultar evaluación actual',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=422182','https://www.gbif.org/species/2225788','https://commons.wikimedia.org/wiki/File:Cardisoma_guanhumi.jpg'],desc:'Cangrejo terrestre de gran tamaño relativo, asociado a manglares y zonas costeras.',size:'Variable.',diet:'Omnívoro/herbívoro oportunista.',ecology:'Excava madrigueras; puede ser sensible a presión de captura.',coords:[[25.7,-80.2],[10.4,-75.5]],image:'https://commons.wikimedia.org/wiki/Special:FilePath/Cardisoma%20guanhumi.jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'ucides-cordatus',common:'Cangrejo uçá',scientific:'Ucides cordatus',family:'Ocypodidae',habitats:['terrestre','marino'],region:'Manglares del Atlántico occidental',iucn:'Consultar evaluación actual',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=422169','https://www.gbif.org/species/2226240','https://commons.wikimedia.org/wiki/File:Ucides_cordatus_cordatus.jpg'],desc:'Especie asociada a manglares, relevante ecológica y localmente en pesca artesanal donde está permitida.',size:'Variable.',diet:'Detritívoro/herbívoro (hojarasca de manglar, según estudios).',ecology:'Contribuye al procesamiento de materia orgánica en manglares.',coords:[[-2.5,-44.3],[-23.0,-43.2]],interest:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Ucides%20cordatus%20cordatus.jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'eriocheir-sinensis',common:'Cangrejo chino de mitón',scientific:'Eriocheir sinensis',family:'Varunidae',habitats:['agua dulce','marino'],region:'Nativo de Asia oriental; introducido en Europa y América del Norte',iucn:'Consultar evaluación actual',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=107451','https://www.gbif.org/species/2225776','https://commons.wikimedia.org/wiki/File:EriocheirSinensis1.jpg'],desc:'Especie catádroma: vive en agua dulce y migra al mar para reproducirse. Invasora en varias regiones.',size:'Variable.',diet:'Omnívoro.',ecology:'Puede alterar hábitats y competir con especies nativas donde se introduce.',coords:[[31.2,121.5],[51.9,4.1],[37.8,-122.3]],interest:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/EriocheirSinensis1.jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'potamon-potamios',common:'Cangrejo de agua dulce del Mediterráneo oriental',scientific:'Potamon potamios',family:'Potamidae',habitats:['agua dulce'],region:'Mediterráneo oriental y regiones cercanas',iucn:'Consultar evaluación actual',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=442958','https://www.gbif.org/species/5863375','https://commons.wikimedia.org/wiki/File:Potamon_potamios_Crete.jpg'],desc:'Ejemplo de cangrejo dulceacuícola verdadero. Los ciclos de vida pueden diferir de los braquiuros marinos con larvas planctónicas.',size:'Variable.',diet:'Omnívoro.',ecology:'Habita ríos/arroyos; sensible a calidad del agua.',coords:[[35.2,33.3],[37.9,23.7]],image:'https://commons.wikimedia.org/wiki/Special:FilePath/Potamon%20potamios%20Crete.jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'kiwa-hirsuta',common:'Cangrejo yeti',scientific:'Kiwa hirsuta',family:'Kiwaidae',habitats:['aguas profundas','marino'],region:'Pacífico sur (fuentes hidrotermales; registros específicos)',iucn:'Datos/estado: consultar fuentes actuales',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=249750','https://www.gbif.org/species/4312523','https://commons.wikimedia.org/wiki/File:Kiwa_hirsuta.jpg'],desc:'Crustáceo decápodo de aguas profundas asociado a ambientes hidrotermales. Es un anomuro (no un braquiuros típico), incluido como ejemplo destacado de adaptación extrema; verificar clasificación antes de compararlo con cangrejos verdaderos.',size:'Pequeño en comparación con grandes braquiuros; verificar.',diet:'Relacionado con recursos microbianos/partículas (según estudios).',ecology:'Adaptado a ambientes hidrotermales profundos.',coords:[[-37.78,-110.91]],interest:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Kiwa%20hirsuta.jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'grapsus-grapsus',common:'Cangrejo zapaya',scientific:'Grapsus grapsus',family:'Grapsidae',habitats:['marino'],region:'Pacífico oriental tropical (incl. Galápagos)',iucn:'Consultar evaluación actual',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=422188','https://www.gbif.org/species/2225766','https://commons.wikimedia.org/wiki/File:Grapsus_grapsus_Galapagos_Islands.jpg'],desc:'Cangrejo litoral conspicuo en costas rocosas.',size:'Variable.',diet:'Omnívoro/algívoro según disponibilidad.',ecology:'Consume algas y materia orgánica en zonas intermareales.',coords:[[-0.74,-90.30],[0.0,-78.5]],image:'https://commons.wikimedia.org/wiki/Special:FilePath/Grapsus%20grapsus%20Galapagos%20Islands.jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'cancer-pagurus',common:'Buey de mar',scientific:'Cancer pagurus',family:'Cancridae',habitats:['marino'],region:'Atlántico noreste y mares europeos',iucn:'Consultar evaluación actual',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=107276','https://www.gbif.org/species/2225569','https://commons.wikimedia.org/wiki/File:Cancer_pagurus.jpg'],desc:'Braquiuros de interés pesquero en algunas regiones europeas.',size:'Puede alcanzar tamaños grandes; verificar normativa local.',diet:'Carnívoro/omnívoro.',ecology:'Depredador bentónico.',coords:[[50.1,-5.5],[56.0,-3.0]],giant:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Cancer%20pagurus.jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'ocypode-quadrata',common:'Cangrejo fantasma del Atlántico',scientific:'Ocypode quadrata',family:'Ocypodidae',habitats:['terrestre','marino'],region:'Playas arenosas del Atlántico occidental',iucn:'Consultar evaluación actual',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=422171','https://www.gbif.org/species/2226259','https://commons.wikimedia.org/wiki/File:Ocypode_quadrata_(Cahuita).jpg'],desc:'Cangrejo semi-terrestre de playas; activo principalmente al crepúsculo/noche.',size:'Pequeño a mediano.',diet:'Omnívoro/carroñero.',ecology:'Indicador sensible a perturbación de playas en algunos contextos.',coords:[[32.1,-80.8],[18.4,-66.0]],image:'https://commons.wikimedia.org/wiki/Special:FilePath/Ocypode%20quadrata%20(Cahuita).jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'}),
+      sp({id:'paralithodes-camtschaticus',common:'Cangrejo real rojo',scientific:'Paralithodes camtschaticus',family:'Lithodidae',habitats:['marino','aguas profundas'],region:'Pacífico norte; introducido en el Barents',iucn:'Consultar evaluación actual',sources:['https://www.marinespecies.org/aphia.php?p=taxdetails&id=233889','https://www.fao.org/fishery/en/aqspecies/2629/en','https://commons.wikimedia.org/wiki/File:Paralithodes_camtschaticus,_1.jpg'],desc:'Anomuro de gran valor comercial, frecuentemente llamado “cangrejo real”. No es un braquiuros verdadero, pero se incluye como referencia comercial/biológica con aclaración taxonómica.',size:'Grande; ver fuentes pesqueras.',diet:'Bentónico/omnívoro.',ecology:'Depredador bentónico; su introducción puede generar impactos.',coords:[[57.0,-170.0],[70.0,31.0]],giant:true,interest:true,anomuran:true,image:'https://commons.wikimedia.org/wiki/Special:FilePath/Paralithodes%20camtschaticus,%201.jpg?width=640',imageCredit:'Wikimedia Commons — verificar autor/licencia.'})
+    ];
+    function sp(o){return {synonyms:'Consultar WoRMS/DecaNet',kingdom:'Animalia',phylum:'Arthropoda',class:'Malacostraca',order:'Decapoda',genus:o.scientific.split(' ')[0],weight:'No disponible / variable',color:'Variable según especie y ambiente',anatomy:'Consultar ficha taxonómica y literatura',carapace:'Variable',claws:'Quelípedos presentes en decápodos; forma/tamaño variable',dimorphism:'Puede existir; verificar por especie',behavior:'Variable',reproduction:'Variable; muchos braquiuros marinos tienen larvas, pero no todos los decápodos siguen el mismo patrón',development:'Variable',lifespan:'No disponible / variable',depth:'No disponible / variable',temperature:'No disponible / variable',ecosystem:'No disponible / variable',predators:'No disponible / variable',prey:'No disponible / variable',relations:'No disponible / variable',threats:'Consultar UICN/fuentes regionales',trend:'Consultar UICN',measures:'Consultar UICN y gestión local',image:'',imageAlt:'',imageCredit:'',images:[],...o};}
+
+    // ---------- Morfología (general, sin selector de especies) ----------
+    const MORPH = [
+      {id:'cefalotorax',name:'Cefalotórax',desc:'Región corporal donde se fusionan cabeza y tórax en los decápodos.',func:'Soporta apéndices, órganos sensoriales, piezas bucales y estructuras asociadas a la alimentación y locomoción.',traits:'Forma y proporciones variables; puede ser ancho, ovalado o más estrecho según el grupo.',adapt:'En cangrejos nadadores (p. ej., portúnidos) suele ser más ancho; en grupos trepadores o de madriguera puede presentar otras proporciones.',img:'https://upload.wikimedia.org/wikipedia/commons/2/28/Crab_tagged.png',credit:'Wikimedia Commons — diagrama anatómico etiquetado; verificar autor y licencia en la ficha del archivo.'},
+      {id:'caparazon',name:'Caparazón',desc:'Cubierta dorsal endurecida que protege el cefalotórax.',func:'Protección mecánica, soporte estructural y anclaje para músculos.',traits:'Puede ser liso, granuloso, espinoso o con surcos; su forma depende de la ecología.',adapt:'Espinas y relieves pueden ayudar a la defensa o al camuflaje; en especies excavadoras la forma facilita el movimiento en el sustrato.',img:'https://commons.wikimedia.org/wiki/Special:FilePath/Carcinus_maenas.jpg?width=640',credit:'Wikimedia Commons — fotografía ilustrativa; verificar licencia.'},
+      {id:'abdomen',name:'Abdomen',desc:'En los braquiuros está reducido y plegado bajo el cefalotórax (pleón).',func:'Protege estructuras reproductivas; en hembras ovígeras sostiene la masa de huevos.',traits:'Su contorno varía entre sexos y especies; suele ser más amplio en hembras maduras.',adapt:'La reducción del abdomen contribuye al cuerpo compacto típico de los cangrejos verdaderos; existen variaciones entre grupos de decápodos.',img:'https://commons.wikimedia.org/wiki/Special:FilePath/Cancer_pagurus.jpg?width=640',credit:'Wikimedia Commons — fotografía ilustrativa; verificar licencia.'},
+      {id:'quelipedos',name:'Pinzas o quelípedos',desc:'Primer par de pereiópodos modificado en pinzas (quelas).',func:'Captura y manipulación de alimento, defensa, corte, excavación y comunicación visual/conductual.',traits:'Tamaño, robustez y dentición variables; puede haber heteroquelia (una pinza mayor).',adapt:'Pinzas fuertes en depredadores/rompedores; pinzas especializadas en alimentación por filtración, raspado o exhibición según el grupo.',img:'https://commons.wikimedia.org/wiki/Special:FilePath/Callinectes_sapidus_1.jpg?width=640',credit:'Wikimedia Commons — fotografía ilustrativa; verificar licencia.'},
+      {id:'pereiopodos',name:'Pereiópodos',desc:'Apéndices torácicos utilizados principalmente para la locomoción; los decápodos presentan cinco pares de apéndices torácicos con especializaciones diversas.',func:'Marcha, natación, trepa, excavación o agarre al sustrato.',traits:'Longitud, grosor y forma del dáctilo/propodio varían notablemente.',adapt:'El último par puede estar modificado en forma de paleta para nadar (nadadores); en especies terrestres favorece la marcha sobre superficies firmes.',img:'https://commons.wikimedia.org/wiki/Special:FilePath/Blue_crab_on_market_in_Piraeus_-_Callinectes_sapidus_Rathbun_20020819-317.jpg?width=640',credit:'Wikimedia Commons — fotografía ilustrativa; verificar licencia.'},
+      {id:'branquias',name:'Branquias',desc:'Órganos respiratorios situados en cámaras branquiales bajo el caparazón.',func:'Intercambio de oxígeno y dióxido de carbono entre el medio y la hemolinfa.',traits:'Número y disposición varían entre grupos de decápodos.',adapt:'Especies acuáticas dependen de la ventilación con agua; especies terrestres/semi-terrestres requieren mantener humedad y presentan adaptaciones conductuales/anatómicas para respirar en aire.',img:'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/Crab_internal_anatomy.jpg/960px-Crab_internal_anatomy.jpg',credit:'Wikimedia Commons — anatomía interna de un cangrejo; verificar autor, licencia e identificación en la ficha del archivo.'},
+      {id:'ojos',name:'Ojos',desc:'Generalmente ojos compuestos, a menudo situados sobre pedúnculos oculares.',func:'Detección de luz, movimiento y contrastes; apoyo en orientación y respuesta ante amenazas.',traits:'Tamaño y posición variables; los pedúnculos pueden retraerse en muchas especies.',adapt:'En especies de playas o zonas abiertas la visión amplia es útil; en hábitats con refugios o baja luz pueden predominar otras modalidades sensoriales.',img:'https://commons.wikimedia.org/wiki/Special:FilePath/Ocypode_quadrata_(Cahuita).jpg?width=640',credit:'Wikimedia Commons — fotografía ilustrativa; verificar licencia.'},
+      {id:'antenas',name:'Antenas y anténulas',desc:'Apéndices sensoriales anteriores con funciones químicas y táctiles.',func:'Quimiorrecepción, mecanorrecepción y exploración del entorno.',traits:'Longitud y movilidad variables según hábitat y comportamiento.',adapt:'Importantes para localizar alimento, detectar señales químicas, percibir corrientes/vibraciones y encontrar refugio o parejas.',img:'https://commons.wikimedia.org/wiki/Special:FilePath/EriocheirSinensis1.jpg?width=640',credit:'Wikimedia Commons — fotografía ilustrativa; verificar licencia.'}
+    ];
+
+    const LIFE = [
+      {id:'huevo',name:'Huevo',desc:'En muchos braquiuros, los huevos fecundados se adhieren a los pleópodos bajo el abdomen de la hembra (hembra ovígera).',phys:'Cada huevo contiene un embrión en desarrollo; su color y tamaño pueden cambiar con la maduración.',beh:'La hembra suele airear y proteger la masa de huevos.',env:'Temperatura, salinidad, oxígeno y calidad del agua influyen en el desarrollo; la duración varía por especie.',importance:'Asegura la protección inicial de los embriones y la transición al siguiente estadio larvario o juvenil.',image:'https://commons.wikimedia.org/wiki/Special:FilePath/Boxer%20Crab%20carrying%20eggs%20-%20Lybia%20tessellata.jpg?width=900',credit:'Foto: prilfish (Silke Baron), CC BY 2.0, vía Wikimedia Commons — Lybia tessellata con huevos. Es un ejemplo de otra especie; la morfología y el color de los huevos varían.',alt:'Cangrejo boxeador (Lybia tessellata) llevando una masa de huevos'},
+      {id:'zoea',name:'Zoea',desc:'Fase larvaria planctónica presente en muchas especies marinas de cangrejos; no es universal en todos los decápodos.',phys:'Morfología muy distinta al adulto, con espinas/apéndices larvarios adaptados a la vida pelágica; pasa por mudas larvarias.',beh:'Nada y deriva en la columna de agua como parte del zooplancton; se alimenta de partículas/organismos pequeños según especie.',env:'Corrientes, disponibilidad de alimento, depredación, temperatura y salinidad afectan la supervivencia.',importance:'Permite dispersión en el medio marino antes del asentamiento bentónico.',image:'https://commons.wikimedia.org/wiki/Special:FilePath/Carcinus_maenas,_zoea_larva.png?width=900',credit:'Ilustración científica: Ernst Haeckel, dominio público, vía Wikimedia Commons — zoea de Carcinus maenas. No es una fotografía; se usa como ilustración auténtica debidamente identificada.',alt:'Ilustración científica de una larva zoea de Carcinus maenas'},
+      {id:'megalopa',name:'Megalopa',desc:'Etapa de transición entre la vida planctónica larvaria y la vida bentónica juvenil en muchos braquiuros.',phys:'Combina rasgos larvarios con características más similares al cangrejo juvenil; el cuerpo se reorganiza hacia la forma bentónica.',beh:'Busca activamente un hábitat adecuado para asentarse (sustrato, refugio, alimento).',env:'La disponibilidad de hábitat de asentamiento y las condiciones locales son críticas; el momento varía por especie.',importance:'Conecta la dispersión larvaria con el reclutamiento de juveniles en el ecosistema.',image:'https://commons.wikimedia.org/wiki/Special:FilePath/Megalopa.jpg?width=900',credit:'Foto: Alvaro E. Migotto, CC BY-SA 3.0, vía Wikimedia Commons — megalopa de un braquiuro no identificado (Portunidae). No debe interpretarse como una especie concreta sin verificar la ficha original.',alt:'Fotografía de una megalopa de cangrejo, etapa de transición'},
+      {id:'juvenil',name:'Juvenil',desc:'Etapa posterior al asentamiento; el individuo se parece al adulto pero aún no alcanza la madurez sexual.',phys:'Crecimiento por mudas sucesivas (ecdisis); proporciones y ornamentación pueden cambiar con el desarrollo.',beh:'Suele depender de refugios para reducir depredación; la dieta y actividad cambian con la talla.',env:'Hábitats de crianza (manglares, estuarios, zonas rocosas, fondos someros, etc.) pueden ser esenciales según especie.',importance:'Representa el reclutamiento y crecimiento hacia la población reproductora.',image:'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Juv%C3%A9nile_de_crabe_vert_%28Carcinus_maenas%29_enfoui_dans_le_sable_%28Ifremer_00565-67747_-_43032%29.jpg/960px-Juv%C3%A9nile_de_crabe_vert_%28Carcinus_maenas%29_enfoui_dans_le_sable_%28Ifremer_00565-67747_-_43032%29.jpg',credit:'Foto: Ifremer / Wikimedia Commons — juvenil de Carcinus maenas enterrado en la arena; verificar autor, licencia e identificación en la ficha del archivo.',alt:'Juvenil de cangrejo verde (Carcinus maenas) enterrado en la arena'},
+      {id:'adulto',name:'Adulto',desc:'Individuo sexualmente maduro; su morfología y comportamiento reproductivo dependen de la especie.',phys:'Presenta la forma característica de la especie; muchos decápodos continúan mudando, aunque la frecuencia puede disminuir.',beh:'Reproducción, búsqueda de pareja, defensa, migraciones o cuidado parental según la especie.',env:'La supervivencia y reproducción dependen de hábitat, temperatura, alimento, presión pesquera y otras condiciones.',importance:'Cierra el ciclo vital al producir descendencia y mantener las poblaciones.',image:'https://commons.wikimedia.org/wiki/Special:FilePath/Carcinus_maenas.jpg?width=900',credit:'Foto: Hans Hillewaert, CC BY-SA 4.0, vía Wikimedia Commons — Carcinus maenas adulto.',alt:'Cangrejo verde adulto (Carcinus maenas)'}
+    ];
+
+    const ARTICLES = {
+      exoesqueleto:{title:'Exoesqueleto protector',crumb:'Inicio / Exoesqueleto',html:`<div class="detail-hero p-6 mb-5"><h2 class="font-display text-3xl font-bold mb-2">Exoesqueleto protector</h2><p class="muted">Estructura externa rígida que protege, soporta y condiciona el crecimiento mediante la muda.</p></div><div class="grid lg:grid-cols-2 gap-5"><article class="card p-6"><h3 class="text-xl font-semibold mb-2">Composición y función</h3><p class="muted">El exoesqueleto de los crustáceos está formado por una matriz orgánica (incluida quitina) y, en muchos casos, componentes mineralizados como carbonato de calcio. Proporciona protección frente a daños mecánicos y depredadores, y sirve como punto de inserción muscular para el movimiento.</p></article><article class="card p-6"><h3 class="text-xl font-semibold mb-2">Muda o ecdisis</h3><p class="muted">Para crecer, el cangrejo debe desprender el exoesqueleto viejo y formar uno nuevo. Durante y después de la muda el cuerpo está blando y más vulnerable, por lo que muchas especies buscan refugio. La frecuencia y duración del proceso varían según especie, edad y condiciones ambientales.</p></article></div><p class="text-sm muted mt-5 source">Fuentes generales: <a href="https://www.marinespecies.org/" target="_blank" rel="noopener">WoRMS</a>, literatura de biología de crustáceos/decápodos.</p>`},
+      respiracion:{title:'Sistema respiratorio',crumb:'Inicio / Respiración',html:`<div class="detail-hero p-6 mb-5"><h2 class="font-display text-3xl font-bold mb-2">Sistema respiratorio</h2><p class="muted">Las branquias permiten el intercambio gaseoso; su eficacia depende del agua o de mantener superficies húmedas.</p></div><div class="grid lg:grid-cols-2 gap-5"><article class="card p-6"><h3 class="text-xl font-semibold mb-2">Branquias y cámara branquial</h3><p class="muted">En la mayoría de los cangrejos, las branquias se localizan en cámaras branquiales a ambos lados del cefalotórax, bajo el caparazón. El agua circula por estas cámaras y el oxígeno pasa a la hemolinfa mientras el dióxido de carbono se elimina.</p></article><article class="card p-6"><h3 class="text-xl font-semibold mb-2">Especies acuáticas y terrestres</h3><p class="muted">Las especies acuáticas dependen del agua para ventilar las branquias. Las especies terrestres o semi-terrestres han desarrollado adaptaciones conductuales y anatómicas para conservar humedad y facilitar el intercambio gaseoso en aire, aunque muchas mantienen dependencia de ambientes húmedos o del agua para reproducción.</p></article></div><p class="text-sm muted mt-5 source">Fuente general: <a href="https://www.marinespecies.org/" target="_blank" rel="noopener">WoRMS</a> y tratados de carcinología.</p>`},
+      sentidos:{title:'Órganos sensoriales',crumb:'Inicio / Órganos sensoriales',html:`<div class="detail-hero p-6 mb-5"><h2 class="font-display text-3xl font-bold mb-2">Órganos sensoriales</h2><p class="muted">Visión, química y mecanorrecepción orientan la alimentación, defensa y reproducción.</p></div><div class="card p-6"><ul class="list-disc pl-5 muted space-y-2"><li><strong class="text-white">Ojos compuestos:</strong> detectan movimiento y cambios de luz; con frecuencia se ubican en pedúnculos oculares móviles.</li><li><strong class="text-white">Antenas y anténulas:</strong> participan en la detección de señales químicas y táctiles.</li><li><strong class="text-white">Quimiorrecepción:</strong> ayuda a localizar alimento, evaluar sustancias del entorno y reconocer señales biológicas.</li><li><strong class="text-white">Mecanorrecepción:</strong> permite percibir vibraciones, contacto y corrientes de agua.</li></ul></div><p class="text-sm muted mt-5 source">Fuente general: literatura de biología sensorial de crustáceos; bases taxonómicas como <a href="https://www.marinespecies.org/" target="_blank" rel="noopener">WoRMS</a>.</p>`},
+      morfologia:{title:'Morfología interactiva',crumb:'Inicio / Morfología',html:`<div class="detail-hero p-6 mb-5"><h2 class="font-display text-3xl font-bold mb-2">Morfología interactiva</h2><p class="muted">Usa el panel de morfología en Inicio para consultar las estructuras anatómicas generales.</p></div><div class="card p-6"><p class="muted">Se incluyen cefalotórax, caparazón, abdomen, quelípedos, pereiópodos, branquias, ojos y antenas. La sección es anatómica general: no incluye selector ni comparador de especies. La variación entre linajes se explica en cada estructura.</p><button class="btn btn-primary mt-4" onclick="showTab('inicio'); setTimeout(()=>document.getElementById('morfologia-panel').scrollIntoView({behavior:'smooth'}),150)">Ir al panel anatómico</button></div>`}
+    };
+
+    // ---------- Estado ----------
+    let currentTab = 'inicio';
+    let historyStack = [];
+    let quickFilter = 'all';
+    let catalogPage = 1;
+    const PAGE_SIZE = 9;
+    let filteredSpecies = [...SPECIES];
+    let map, markerCluster, mapMarkers = [], fallbackLoaded = false;
+
+    function showTab(tab, push=true){
+      if (push && currentTab !== tab && currentTab !== 'detail') historyStack.push({type:'tab',tab:currentTab});
+      currentTab = tab;
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+      const view = document.getElementById('view-'+tab);
+      if(view) view.classList.add('active');
+      const sel = document.getElementById('mobileTab'); if(sel) sel.value = tab;
+      updateBreadcrumb(tab);
+      if(tab==='mapa') setTimeout(()=>{ initMap(); if(map){ map.invalidateSize(); applyWorldBounds(); } }, 120);
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function updateBreadcrumb(tab){
+      const bc = document.getElementById('breadcrumbs');
+      if(tab==='detail'){ bc.classList.remove('hidden'); return; }
+      bc.classList.add('hidden'); bc.textContent='';
+    }
+    function openDetail(title, crumb, html){
+      historyStack.push({type:'tab',tab:currentTab});
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      document.getElementById('view-detail').classList.add('active');
+      document.getElementById('detailCrumb').textContent = crumb || title;
+      document.getElementById('detailContent').innerHTML = html;
+      currentTab = 'detail';
+      document.getElementById('breadcrumbs').classList.remove('hidden');
+      document.getElementById('breadcrumbs').textContent = crumb || title;
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function goBack(){
+      const prev = historyStack.pop();
+      if(prev && prev.type==='tab') showTab(prev.tab,false); else showTab('inicio',false);
+    }
+    function openArticle(key){
+      const a = ARTICLES[key]; if(!a) return;
+      openDetail(a.title,a.crumb,a.html);
+    }
+
+    // ---------- Inicio: morfología y ciclo ----------
+    function initIntro(){
+      renderMorphology();
+      const tl = document.getElementById('lifeTimeline');
+      if(tl && !tl.dataset.ready){
+        LIFE.forEach((s,i)=>{
+          const b=document.createElement('button');
+          b.className='timeline-step text-left'+(i===0?' active':'');
+          b.innerHTML=`<div class="text-xs accent font-semibold">Etapa ${i+1}</div><div class="font-semibold">${s.name}</div>`;
+          b.onclick=()=>selectLife(s.id);
+          b.dataset.life=s.id;
+          tl.appendChild(b);
+        });
+        tl.dataset.ready='1';
+      }
+      selectLife('huevo');
+    }
+    function renderMorphology(){
+      const list=document.getElementById('morphList');
+      if(!list || list.dataset.ready) { selectMorph(document.querySelector('[data-morph].active')?.dataset.morph || MORPH[0].id); return; }
+      MORPH.forEach((m,i)=>{
+        const b=document.createElement('button');
+        b.className='chip w-full text-left'+(i===0?' active':'');
+        b.textContent=m.name; b.dataset.morph=m.id; b.onclick=()=>selectMorph(m.id);
+        list.appendChild(b);
+      });
+      list.dataset.ready='1';
+      selectMorph(MORPH[0].id);
+    }
+    function selectMorph(id){
+      document.querySelectorAll('[data-morph]').forEach(b=>b.classList.toggle('active',b.dataset.morph===id));
+      const m=MORPH.find(x=>x.id===id); if(!m) return;
+      const img = m.img ? `<figure class="mb-4"><img src="${m.img}" alt="${escapeHtml(m.name)}" loading="lazy" referrerpolicy="no-referrer" class="w-full max-h-56 object-cover rounded-xl border border-[var(--line)]" onerror="this.parentElement.innerHTML='<div class=\'p-4 rounded-xl border border-[var(--line)] muted text-sm\'>Ilustración no disponible. Consulte fuentes anatómicas especializadas.</div>'"><figcaption class="text-xs muted mt-2">${escapeHtml(m.credit||'')}</figcaption></figure>` : '';
+      document.getElementById('morphDetail').innerHTML=`${img}<h3 class="text-2xl font-semibold mb-2">${m.name}</h3>
+        <p class="muted mb-3">${m.desc}</p>
+        <div class="grid sm:grid-cols-2 gap-3 text-sm">
+          <div class="p-3 rounded-lg border border-[var(--line)]"><strong class="text-white">Función biológica</strong><p class="muted mt-1">${m.func}</p></div>
+          <div class="p-3 rounded-lg border border-[var(--line)]"><strong class="text-white">Características principales</strong><p class="muted mt-1">${m.traits}</p></div>
+        </div>
+        <div class="p-3 rounded-lg border border-[var(--line)] mt-3 text-sm"><strong class="text-white">Adaptaciones / diferencias entre grupos</strong><p class="muted mt-1">${m.adapt}</p></div>`;
+    }
+    function selectLife(id){
+      document.querySelectorAll('[data-life]').forEach(b=>b.classList.toggle('active',b.dataset.life===id));
+      const s=LIFE.find(x=>x.id===id);
+      const fallback = `<div class="p-4 rounded-xl border border-[var(--line)] muted text-sm">Imagen no disponible temporalmente. Consulta repositorios con licencia: <a class="accent underline" href="https://commons.wikimedia.org/wiki/Category:Crabs" target="_blank" rel="noopener">Wikimedia Commons</a>, <a class="accent underline" href="https://www.gbif.org/" target="_blank" rel="noopener">GBIF</a>, <a class="accent underline" href="https://openverse.org/search/image?q=crab+larva" target="_blank" rel="noopener">Openverse</a>.</div>`;
+      const photo = s.image ? `<figure class="rounded-xl overflow-hidden border border-[var(--line)] bg-[#081423]"><img src="${s.image}" alt="${escapeHtml(s.alt||s.name)}" loading="lazy" referrerpolicy="no-referrer" class="w-full h-64 md:h-80 object-cover" onerror="this.outerHTML='${fallback.replace(/'/g,"&#39;")}'"><figcaption class="text-xs muted p-3 border-t border-[var(--line)]">${escapeHtml(s.credit||'Verificar licencia.')} · Fuentes de imágenes: <a class="accent underline" href="https://pixabay.com/images/search/crab/" target="_blank" rel="noopener">Pixabay</a>, <a class="accent underline" href="https://www.pexels.com/search/crab/" target="_blank" rel="noopener">Pexels</a>, <a class="accent underline" href="https://unsplash.com/s/photos/crab" target="_blank" rel="noopener">Unsplash</a>, <a class="accent underline" href="https://commons.wikimedia.org/wiki/Category:Crabs" target="_blank" rel="noopener">Commons</a>, <a class="accent underline" href="https://openverse.org/search/image?q=crab" target="_blank" rel="noopener">Openverse</a>.</figcaption></figure>` : fallback;
+      document.getElementById('lifeDetail').innerHTML=`<h3 class="text-2xl font-semibold mb-3">${s.name}</h3>
+        <div class="grid lg:grid-cols-[1.15fr,1fr] gap-5 items-start">
+          <div>${photo}</div>
+          <div class="grid gap-3 text-sm muted">
+            <p><strong class="text-white">Descripción:</strong> ${s.desc}</p>
+            <p><strong class="text-white">Características físicas / cambios:</strong> ${s.phys}</p>
+            <p><strong class="text-white">Comportamiento:</strong> ${s.beh}</p>
+            <p><strong class="text-white">Condiciones ambientales relevantes:</strong> ${s.env}</p>
+            <p><strong class="text-white">Importancia biológica:</strong> ${s.importance||''}</p>
+            <p class="text-xs">Nota: las etapas y su duración varían según la especie; algunos cangrejos (especialmente dulceacuícolas/terrestres) pueden presentar desarrollo diferente.</p>
+          </div>
+        </div>`;
+    }
+
+    // ---------- Catálogo ----------
+    function initCatalog(){
+      const regions=[...new Set(SPECIES.map(s=>s.region.split(/[;(]/)[0].trim()))].sort();
+      const sel=document.getElementById('qRegion');
+      regions.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;sel.appendChild(o)});
+      applyCatalogFilters();
+    }
+    function setQuickFilter(btn,val){ quickFilter=val; catalogPage=1; document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b===btn)); applyCatalogFilters(); }
+    function applyCatalogFilters(){
+      const common=document.getElementById('qCommon').value.toLowerCase().trim();
+      const sci=document.getElementById('qSci').value.toLowerCase().trim();
+      const hab=document.getElementById('qHabitat').value;
+      const reg=document.getElementById('qRegion').value;
+      const sort=document.getElementById('qSort').value;
+      filteredSpecies = SPECIES.filter(s=>{
+        if(common && !s.common.toLowerCase().includes(common)) return false;
+        if(sci && !s.scientific.toLowerCase().includes(sci)) return false;
+        if(hab!=='all' && !s.habitats.includes(hab)) return false;
+        if(reg!=='all' && !s.region.startsWith(reg)) return false;
+        if(quickFilter==='gigante' && !s.giant) return false;
+        if(quickFilter==='interes' && !s.interest) return false;
+        if(['marino','terrestre','agua dulce','aguas profundas'].includes(quickFilter) && !s.habitats.includes(quickFilter)) return false;
+        return true;
+      });
+      filteredSpecies.sort((a,b)=>{
+        if(sort==='sci') return a.scientific.localeCompare(b.scientific);
+        if(sort==='family') return a.family.localeCompare(b.family)||a.common.localeCompare(b.common);
+        return a.common.localeCompare(b.common,'es');
+      });
+      renderCatalog();
+    }
+    function renderCatalog(){
+      const grid=document.getElementById('catalogGrid');
+      const total=filteredSpecies.length; const pages=Math.max(1,Math.ceil(total/PAGE_SIZE));
+      catalogPage=Math.min(catalogPage,pages);
+      const start=(catalogPage-1)*PAGE_SIZE; const items=filteredSpecies.slice(start,start+PAGE_SIZE);
+      document.getElementById('catalogCount').textContent=`${total} especies mostradas (catálogo curado)`;
+      document.getElementById('pageInfo').textContent=`Página ${catalogPage} de ${pages}`;
+      grid.innerHTML=items.map(s=>`
+        <article class="card p-5 flex flex-col">
+          <div class="h-40 rounded-xl mb-4 border border-[var(--line)] overflow-hidden bg-[#081423] flex items-center justify-center">
+            ${s.image ? `<img src="${s.image}" alt="${escapeHtml(s.common)} (${escapeHtml(s.scientific)})" loading="lazy" referrerpolicy="no-referrer" class="w-full h-full object-cover" onerror="this.outerHTML='<div class=\'p-3 text-center text-xs muted\'>No se pudo cargar la imagen.<br><a class=\'accent underline\' href=\'${s.sources[0]||'#'}\' target=\'_blank\' rel=\'noopener\'>Ver fuente</a></div>'">` : `<div class="p-3 text-center text-xs muted">Sin imagen disponible. Consultar GBIF/iNaturalist.</div>`}
+          </div>
+          <h3 class="text-xl font-semibold">${escapeHtml(s.common)}</h3>
+          <p class="accent italic">${escapeHtml(s.scientific)}</p>
+          <p class="text-sm muted mt-2">${escapeHtml(s.family)} · ${escapeHtml(s.habitats.join(', '))}</p>
+          <p class="text-sm muted">${escapeHtml(s.region)}</p>
+          <p class="text-xs mt-2 ${s.iucn.includes('Vulnerable')?'text-orange-300':'text-slate-300'}">Conservación: ${escapeHtml(s.iucn)}</p>
+          <div class="mt-4 flex gap-2 mt-auto">
+            <button class="btn btn-primary" onclick="openSpecies('${s.id}')">Ficha</button>
+            <button class="btn btn-ghost" onclick="focusSpeciesOnMap('${s.scientific}')">Mapa</button>
+          </div>
+        </article>`).join('') || `<div class="card p-6 muted">No hay resultados con los filtros actuales.</div>`;
+    }
+    function changePage(d){ catalogPage+=d; renderCatalog(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+    function openSpecies(id){
+      const s=SPECIES.find(x=>x.id===id); if(!s) return;
+      const taxRows=[['Nombre común',s.common],['Nombre científico aceptado',`<em>${escapeHtml(s.scientific)}</em>`],['Sinónimos',s.synonyms],['Reino',s.kingdom],['Filo',s.phylum],['Clase',s.class],['Orden',s.order],['Familia',s.family],['Género',s.genus],['Aclaración taxonómica',s.anomuran?'Incluido como referencia de anomuro/cangrejo real; no es braquiuros verdadero.':'Braquiuros u otro decápodo según ficha; validar en WoRMS.']].map(r=>`<tr><th>${r[0]}</th><td class="muted">${r[1]}</td></tr>`).join('');
+      openDetail(s.common, `Catálogo / ${s.common}`, `
+        <div class="detail-hero p-6 mb-5">
+          <h2 class="font-display text-3xl md:text-4xl font-bold">${escapeHtml(s.common)}</h2>
+          <p class="accent italic text-lg">${escapeHtml(s.scientific)}</p>
+          <p class="muted mt-2">${escapeHtml(s.desc)}</p>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-5">
+          <section class="card p-6"><h3 class="text-xl font-semibold mb-3">Identificación y taxonomía</h3><div class="overflow-x-auto"><table>${taxRows}</table></div></section>
+          <section class="card p-6"><h3 class="text-xl font-semibold mb-3">Características físicas</h3><table>
+            <tr><th>Tamaño</th><td class="muted">${escapeHtml(s.size)}</td></tr>
+            <tr><th>Peso</th><td class="muted">${escapeHtml(s.weight)}</td></tr>
+            <tr><th>Coloración</th><td class="muted">${escapeHtml(s.color)}</td></tr>
+            <tr><th>Caparazón</th><td class="muted">${escapeHtml(s.carapace)}</td></tr>
+            <tr><th>Pinzas/patas</th><td class="muted">${escapeHtml(s.claws)}</td></tr>
+            <tr><th>Dimorfismo sexual</th><td class="muted">${escapeHtml(s.dimorphism)}</td></tr>
+          </table></section>
+          <section class="card p-6"><h3 class="text-xl font-semibold mb-3">Biología</h3><table>
+            <tr><th>Alimentación</th><td class="muted">${escapeHtml(s.diet)}</td></tr>
+            <tr><th>Comportamiento</th><td class="muted">${escapeHtml(s.behavior)}</td></tr>
+            <tr><th>Reproducción</th><td class="muted">${escapeHtml(s.reproduction)}</td></tr>
+            <tr><th>Desarrollo</th><td class="muted">${escapeHtml(s.development)}</td></tr>
+            <tr><th>Esperanza de vida</th><td class="muted">${escapeHtml(s.lifespan)}</td></tr>
+          </table></section>
+          <section class="card p-6"><h3 class="text-xl font-semibold mb-3">Hábitat, ecología y conservación</h3><table>
+            <tr><th>Distribución</th><td class="muted">${escapeHtml(s.region)}</td></tr>
+            <tr><th>Hábitat</th><td class="muted">${escapeHtml(s.habitats.join(', '))}</td></tr>
+            <tr><th>Profundidad</th><td class="muted">${escapeHtml(s.depth)}</td></tr>
+            <tr><th>Temperatura</th><td class="muted">${escapeHtml(s.temperature)}</td></tr>
+            <tr><th>Función ecológica</th><td class="muted">${escapeHtml(s.ecology)}</td></tr>
+            <tr><th>Conservación</th><td class="muted">${escapeHtml(s.iucn)}</td></tr>
+            <tr><th>Amenazas</th><td class="muted">${escapeHtml(s.threats)}</td></tr>
+          </table></section>
+        </div>
+        <section class="card p-6 mt-5"><h3 class="text-xl font-semibold mb-3">Contenido multimedia</h3>
+          ${s.image ? `<figure class="mb-4"><img src="${s.image}" alt="${escapeHtml(s.common)}" loading="lazy" referrerpolicy="no-referrer" class="w-full max-h-[420px] object-cover rounded-xl border border-[var(--line)]" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div style="display:none" class="p-4 rounded-xl border border-[var(--line)] muted">No se pudo cargar la imagen remota. Use los enlaces de fuentes.</div><figcaption class="text-xs muted mt-2">${escapeHtml(s.imageCredit||'Verificar licencia en la fuente.')} Fuente: <a class="accent underline" href="${s.sources.find(u=>u.includes('commons.wikimedia'))||s.sources[0]}" target="_blank" rel="noopener">Wikimedia Commons / fuente</a></figcaption></figure>` : `<p class="muted">Sin imagen incrustada para esta especie.</p>`}
+          <p class="muted text-sm">Para galerías adicionales con licencia verificable, consulta GBIF, iNaturalist y Wikimedia Commons. Comprueba que cada fotografía corresponda a <em>${escapeHtml(s.scientific)}</em>.</p>
+          <div class="mt-3 flex flex-wrap gap-2 text-sm">
+            <a class="chip" href="https://www.gbif.org/species/search?q=${encodeURIComponent(s.scientific)}" target="_blank" rel="noopener">Buscar en GBIF</a>
+            <a class="chip" href="https://www.inaturalist.org/search?q=${encodeURIComponent(s.scientific)}" target="_blank" rel="noopener">Buscar en iNaturalist</a>
+            <a class="chip" href="https://commons.wikimedia.org/w/index.php?search=${encodeURIComponent(s.scientific)}" target="_blank" rel="noopener">Buscar en Commons</a>
+          </div></section>
+        <section class="card p-6 mt-5 source"><h3 class="text-xl font-semibold mb-3">Fuentes consultadas</h3><ul class="list-disc pl-5 muted">${s.sources.map(u=>`<li><a href="${u}" target="_blank" rel="noopener">${u}</a></li>`).join('')}</ul></section>`);
+    }
+
+    function focusSpeciesOnMap(scientific){ document.getElementById('mapQuery').value=scientific; showTab('mapa'); }
+
+    // ---------- Mapa ----------
+    const WORLD_BOUNDS = L.latLngBounds([[-85.05112878,-180],[85.05112878,180]]);
+    const MAP_ZOOM_SNAP = 0.1;
+    function computeWorldMinZoom(){
+      if(!map) return 2;
+      const size = map.getSize();
+      if(!size.x || !size.y) return 2;
+      const zoom = map.getZoom();
+      const nw = map.project(WORLD_BOUNDS.getNorthWest(), zoom);
+      const se = map.project(WORLD_BOUNDS.getSouthEast(), zoom);
+      const worldWidth = Math.abs(se.x - nw.x);
+      const worldHeight = Math.abs(se.y - nw.y);
+      if(!worldWidth || !worldHeight) return 2;
+      // Fill the viewport with the world without showing empty margins or copies.
+      const raw = zoom + Math.log2(Math.max(size.x / worldWidth, size.y / worldHeight));
+      return Math.min(map.getMaxZoom(), Math.max(0, Math.ceil(raw / MAP_ZOOM_SNAP) * MAP_ZOOM_SNAP));
+    }
+    function enforceWorldBounds(){
+      if(!map || map.__enforcingWorldBounds) return;
+      const b = map.getBounds();
+      const eps = 0.25;
+      if(b.getWest() < WORLD_BOUNDS.getWest()-eps || b.getEast() > WORLD_BOUNDS.getEast()+eps || b.getSouth() < WORLD_BOUNDS.getSouth()-eps || b.getNorth() > WORLD_BOUNDS.getNorth()+eps){
+        map.__enforcingWorldBounds = true;
+        map.panInsideBounds(WORLD_BOUNDS, {animate:false});
+        map.__enforcingWorldBounds = false;
+      }
+    }
+    function applyWorldBounds(){
+      if(!map) return;
+      const minZoom = computeWorldMinZoom();
+      map.setMaxBounds(WORLD_BOUNDS);
+      map.setMinZoom(minZoom);
+      if(map.getZoom() < minZoom) map.setZoom(minZoom, {animate:false});
+      enforceWorldBounds();
+    }
+    function initMap(){
+      if(map) return;
+      map = L.map('map',{
+        maxBounds: WORLD_BOUNDS,
+        maxBoundsViscosity: 1.0,
+        minZoom: 1,
+        maxZoom: 18,
+        zoomSnap: MAP_ZOOM_SNAP,
+        zoomDelta: 0.5
+      }).setView([20,0],2);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        minZoom: 0,
+        maxZoom: 18,
+        noWrap: true,
+        bounds: WORLD_BOUNDS,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      markerCluster = L.markerClusterGroup({showCoverageOnHover:false,maxClusterRadius:48});
+      map.addLayer(markerCluster);
+      map.on('resize', ()=>applyWorldBounds());
+      map.on('moveend zoomend', enforceWorldBounds);
+      if(window.ResizeObserver){
+        const mapEl = document.getElementById('map');
+        if(mapEl && !mapEl.__worldBoundsObserver){
+          mapEl.__worldBoundsObserver = new ResizeObserver(()=>{
+            if(!map) return;
+            clearTimeout(map.__worldBoundsTimer);
+            map.__worldBoundsTimer = setTimeout(()=>{ map.invalidateSize(); applyWorldBounds(); }, 120);
+          });
+          mapEl.__worldBoundsObserver.observe(mapEl);
+        }
+      }
+      applyWorldBounds();
+      loadFallbackMap();
+    }
+    function clearMarkers(){ markerCluster.clearLayers(); mapMarkers=[]; }
+    function addMarker(rec){
+      const habitat = rec.habitat || 'marino';
+      const m = L.circleMarker([rec.lat,rec.lng],{radius:5,color:'#2dd4bf',fillColor:'#38bdf8',fillOpacity:.75,weight:1});
+      const html = `<div style="min-width:220px"><strong>${escapeHtml(rec.name||'Registro')}</strong><br><em>${escapeHtml(rec.scientific||'')}</em><br><span>${escapeHtml(rec.location||'Ubicación no especificada')}</span><br><span>Fuente: ${escapeHtml(rec.source||'Curada')}</span><br><span>Fecha: ${escapeHtml(rec.date||'No disponible')}</span>${rec.speciesId?`<br><a href="#" onclick="openSpecies('${rec.speciesId}');return false;">Abrir ficha</a>`:''}</div>`;
+      m.bindPopup(html); m.__habitat=habitat; m.__scientific=(rec.scientific||'').toLowerCase();
+      markerCluster.addLayer(m); mapMarkers.push(m);
+    }
+    function loadFallbackMap(){
+      clearMarkers();
+      SPECIES.forEach(s=> (s.coords||[]).forEach((c,i)=> addMarker({lat:c[0],lng:c[1],name:s.common,scientific:s.scientific,location:s.region,source:'Registro curado de respaldo',date:'No disponible',speciesId:s.id,habitat:s.habitats[0]||'marino'})));
+      fallbackLoaded=true; filterMapMarkers();
+      setMapStatus(`Mostrando ${mapMarkers.length} registros curados de respaldo. Estos puntos ilustran presencia, no distribución total.`);
+    }
+    async function loadGbifOccurrences(){
+      initMap();
+      const q = document.getElementById('mapQuery').value.trim();
+      if(!q){ setMapStatus('Escribe un nombre científico para consultar GBIF.', true); return; }
+      setMapStatus('Consultando GBIF...', false, true);
+      try{
+        const url = `https://api.gbif.org/v1/occurrence/search?scientificName=${encodeURIComponent(q)}&hasCoordinate=true&limit=60`;
+        const res = await fetch(url,{headers:{'Accept':'application/json'}});
+        if(!res.ok) throw new Error('Respuesta no válida de GBIF');
+        const data = await res.json();
+        const results = (data.results||[]).filter(r=>typeof r.decimalLatitude==='number' && typeof r.decimalLongitude==='number');
+        if(!results.length){ setMapStatus('GBIF no devolvió ocurrencias georreferenciadas para esa consulta. Se mantienen los registros actuales.', true); return; }
+        clearMarkers();
+        results.forEach(r=> addMarker({
+          lat:r.decimalLatitude, lng:r.decimalLongitude, name:r.vernacularName||r.species||q, scientific:r.scientificName||q,
+          location:[r.locality,r.stateProvince,r.country].filter(Boolean).join(', ')||'No disponible',
+          source:'GBIF', date:r.eventDate ? String(r.eventDate).slice(0,10) : 'No disponible', habitat:'marino'
+        }));
+        filterMapMarkers();
+        map.fitBounds(markerCluster.getBounds().pad(.2), {maxZoom:14});
+        applyWorldBounds();
+        setMapStatus(`Se cargaron ${results.length} registros georreferenciados desde GBIF para "${q}". Recuerda: son observaciones/ocurrencias, no el límite total del hábitat.`);
+      }catch(err){
+        console.error(err);
+        setMapStatus('No se pudo consultar GBIF desde el navegador (red, CORS o límite). Se muestran/pueden mostrarse registros curados de respaldo.', true);
+        if(!fallbackLoaded) loadFallbackMap();
+      }
+    }
+    function filterMapMarkers(){
+      if(!markerCluster) return;
+      const hab=document.getElementById('mapHabitat').value;
+      const q=(document.getElementById('mapQuery').value||'').toLowerCase().trim();
+      markerCluster.clearLayers();
+      mapMarkers.forEach(m=>{
+        const okHab = hab==='all' || m.__habitat===hab;
+        const okQ = !q || m.__scientific.includes(q);
+        if(okHab && okQ) markerCluster.addLayer(m);
+      });
+    }
+    function resetMap(){
+      document.getElementById('mapQuery').value='';
+      document.getElementById('mapHabitat').value='all';
+      if(map){ map.setView([20,0], Math.max(map.getMinZoom(),2), {animate:false}); applyWorldBounds(); }
+      loadFallbackMap();
+    }
+    function setMapStatus(msg, err=false, loading=false){
+      const el=document.getElementById('mapStatus');
+      el.textContent = (loading?'⏳ ':'') + msg;
+      el.className = 'text-sm mt-3 ' + (err?'text-orange-300':'muted');
+    }
+
+    function escapeHtml(s){ return String(s??'').replace(/[&<>"]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+
+
+    // ---------- Temas / artículos (segunda etapa) ----------
+    const TOPICS = {
+      gastronomia: [
+        t('g-alim','Importancia alimentaria','Consumo humano, nutrición, carne y preparación.','alimentaria',`<p class="muted">El consumo de cangrejos varía por región, especie, disponibilidad y cultura. La composición nutricional depende de la especie, parte consumida y método de preparación; para valores concretos (proteínas, minerales, perfil lipídico) deben consultarse tablas alimentarias oficiales y fichas por producto/especie.</p><ul class="list-disc pl-5 muted mt-3 space-y-2"><li><strong class="text-white">Características de la carne:</strong> rendimiento, textura y sabor difieren entre especies (p. ej., especies de aguas frías vs. estuarinas).</li><li><strong class="text-white">Preparación y conservación:</strong> producto vivo, refrigerado, congelado o procesado; las prácticas seguras dependen de normativas locales.</li><li><strong class="text-white">Rigor:</strong> evita generalizar propiedades nutricionales sin especificar especie y fuente.</li></ul>`,['https://www.fao.org/fishery/','https://www.fisheries.noaa.gov/','https://www.frontiersin.org/journals/marine-science']),
+        t('g-pesca','Pesca y explotación comercial','Captura, regulación, procesamiento y mercados.','pesca',`<p class="muted">Las pesquerías de cangrejo incluyen operaciones artesanales e industriales. Los métodos (trampas/nasas, artes reguladas), temporadas, tallas mínimas y cuotas dependen del país y la especie.</p><ul class="list-disc pl-5 muted mt-3 space-y-2"><li>Procesamiento y comercialización: cadena de frío, control sanitario y trazabilidad.</li><li>Mercados internacionales: importaciones/exportaciones varían por año; consultar estadísticas FAO/NOAA y reportes sectoriales con fecha.</li><li>Gestión: la sostenibilidad requiere datos de stock, cumplimiento normativo y monitoreo.</li></ul>`,['https://www.fao.org/fishery/','https://www.fisheries.noaa.gov/']),
+        t('g-industria','Industria y aprovechamiento','Subproductos, quitina/quitosano y aplicaciones.','industria',`<p class="muted">Además del alimento, los residuos de crustáceos (caparazones) pueden aprovecharse como fuente de quitina y su derivado quitosano, con investigación en biomateriales y otras aplicaciones. La viabilidad técnica, económica y ambiental depende del proceso y contexto.</p><ul class="list-disc pl-5 muted mt-3 space-y-2"><li>Aplicaciones industriales/biotecnológicas: en investigación o desarrollo según el caso; distinguir evidencia de potencial.</li><li>Aprovechamiento de residuos: puede reducir desperdicios, sujeto a controles sanitarios y ambientales.</li></ul>`,['https://www.sciencedirect.com/','https://scholar.google.com/','https://www.mdpi.com/journal/marinedrugs']),
+        t('g-snow','Cangrejo de las nieves (<em>Chionoecetes opilio</em>)','Especie comercial de aguas frías.','especie',`<table class="text-sm"><tr><th>Nombre científico</th><td class="muted"><em>Chionoecetes opilio</em></td></tr><tr><th>Distribución</th><td class="muted">Aguas frías del Atlántico noroeste y Pacífico norte (verificar por región).</td></tr><tr><th>Importancia</th><td class="muted">Relevancia comercial en mercados específicos; condiciones de stock y manejo varían.</td></tr><tr><th>Impacto</th><td class="muted">Depende de la pesquería, regulación y estado del stock; consultar evaluaciones científicas y de gestión.</td></tr></table>`,['https://www.fao.org/fishery/en/aqspecies/2644/en','https://www.marinespecies.org/aphia.php?p=taxdetails&id=107315']),
+        t('g-blue','Cangrejo azul (<em>Callinectes sapidus</em>)','Especie estuarina de importancia regional.','especie',`<table class="text-sm"><tr><th>Nombre científico</th><td class="muted"><em>Callinectes sapidus</em></td></tr><tr><th>Distribución</th><td class="muted">Atlántico occidental, estuarios y costas; introducido en algunas regiones.</td></tr><tr><th>Importancia</th><td class="muted">Valor gastronómico y pesquero regional; manejo dependiente de jurisdicción.</td></tr><tr><th>Nota</th><td class="muted">En áreas no nativas puede generar impactos ecológicos; verificar fuentes locales.</td></tr></table>`,['https://www.fao.org/fishery/en/aqspecies/2632/en','https://www.fisheries.noaa.gov/species/blue-crab']),
+        t('g-king','Cangrejo real rojo (<em>Paralithodes camtschaticus</em>)','Anomuro de alto valor comercial.','especie',`<table class="text-sm"><tr><th>Nombre científico</th><td class="muted"><em>Paralithodes camtschaticus</em></td></tr><tr><th>Taxonomía</th><td class="muted">Anomuro (Lithodidae), no braquiuros verdadero; se incluye por relevancia comercial.</td></tr><tr><th>Distribución</th><td class="muted">Pacífico norte; introducido en el Barents.</td></tr><tr><th>Impacto</th><td class="muted">La introducción y explotación requieren evaluación ecológica y regulatoria específica.</td></tr></table>`,['https://www.fao.org/fishery/en/aqspecies/2629/en','https://www.marinespecies.org/aphia.php?p=taxdetails&id=233889']),
+        t('g-coco','Cangrejo de los cocoteros (<em>Birgus latro</em>)','Aprovechamiento limitado; precaución por conservación.','especie',`<table class="text-sm"><tr><th>Nombre científico</th><td class="muted"><em>Birgus latro</em></td></tr><tr><th>Conservación</th><td class="muted">Vulnerable (VU) según evaluación UICN citada en su ficha; verificar estado vigente y fecha.</td></tr><tr><th>Nota</th><td class="muted">No es una especie de consumo comercial generalizado equivalente a las grandes pesquerías de cangrejo. Su captura puede estar regulada/prohibida localmente.</td></tr><tr><th>Impacto</th><td class="muted">Sobreexplotación y pérdida de hábitat son amenazas relevantes; consultar UICN y normativa local.</td></tr></table>`,['https://www.iucnredlist.org/species/2811/126813586','https://www.marinespecies.org/aphia.php?p=taxdetails&id=208668']),
+        t('g-other','Otras especies documentadas','Buey de mar, cangrejos de fango, stone crabs y más.','especie',`<p class="muted">Recursos regionales y de subsistencia que no deben presentarse como equivalentes a las grandes pesquerías. La tabla comparativa está en la ficha ampliada; no asigna categorías UICN.</p>`,['https://www.fao.org/fishery/','https://www.marinespecies.org/','https://www.iucnredlist.org/'])
+      ],
+      cienciaArticles: [
+        ta('Saving the horseshoe crab: A synthetic alternative to horseshoe crab blood for endotoxin detection','Contexto sobre el ensayo LAL y el desarrollo de alternativas sintéticas.','Maloney T, Phelan R, Simmons N.','2018','PLoS Biology','Analiza la dependencia histórica del lisado de amebocitos de cangrejo herradura (LAL) y explora una alternativa sintética/recombinante para detectar endotoxinas. Es relevante para la sostenibilidad de los quelicerados y para la práctica biofarmacéutica; no convierte al cangrejo herradura en un crustáceo.','https://pubmed.ncbi.nlm.nih.gov/30312293/'),
+        ta('Understanding circuit dynamics using the stomatogastric nervous system of lobsters and crabs','Modelo de neurobiología comparada y control motor.','Marder E, Bucher D.','2007','Annual Review of Physiology','Revisión sobre el sistema nervioso estomatogástrico de crustáceos como modelo para estudiar ritmos neuronales, neuromodulación y dinámica de circuitos. Aporta conocimiento básico; no es una terapia humana.','https://pubmed.ncbi.nlm.nih.gov/17009928/'),
+        ta('Chitosan-Based Nanoparticles as Effective Drug Delivery Systems-A review','Revisión de nanopartículas de quitosano para liberación de fármacos.','Jafernik K, Ladniak A, Blicharska E, et al.','2023','Molecules','Sintetiza estrategias de formulación y aplicaciones de nanopartículas de quitosano. La mayor parte de la evidencia es preclínica o de desarrollo tecnológico; la seguridad y eficacia clínica dependen del sistema concreto.','https://pubmed.ncbi.nlm.nih.gov/36838951/'),
+        ta('Chitosan-based hydrogel wound dressing: From mechanism to applications, a review','Revisión sobre hidrogeles de quitosano en apósitos.','Zhao J, Qiu P, Wang Y, et al.','2023','International Journal of Biological Macromolecules','Revisa mecanismos y aplicaciones de hidrogeles de quitosano para apósitos. Es una fuente de investigación biomédica; no debe citarse como prueba de que el quitosano cura cualquier herida.','https://pubmed.ncbi.nlm.nih.gov/37307982/')
+      ],
+      cienciaAdvances: [
+        ta('Reactivos recombinantes para endotoxinas','Alternativas tecnológicas al LAL tradicional.','Maloney et al.; grupos de validación y reguladores.','2018–actualidad','Ciencia aplicada y regulación','Busca reducir la dependencia de hemolinfa de cangrejo herradura mediante métodos recombinantes. Estado: desarrollo y validación; la adopción depende de la regulación, la comparabilidad y el contexto de uso.','https://pubmed.ncbi.nlm.nih.gov/30312293/'),
+        ta('Nanopartículas de quitosano para liberación de fármacos','Formulaciones que buscan transportar principios activos.','Jafernik et al. (revisión).','2023','Molecules','Problema: mejorar estabilidad, biodisponibilidad y liberación controlada. Aporte: plataformas de nanopartículas. Estado: investigación preclínica/tecnológica; no es un tratamiento aprobado por sí sola.','https://pubmed.ncbi.nlm.nih.gov/36838951/'),
+        ta('Hidrogeles de quitosano para apósitos','Materiales para cobertura y manejo de heridas.','Zhao et al. (revisión).','2023','International Journal of Biological Macromolecules','Problema: crear apósitos con propiedades de humedad, adhesión y biocompatibilidad. Aporte: formulaciones de hidrogel. Estado: investigación y desarrollo; la indicación clínica depende del producto y la regulación local.','https://pubmed.ncbi.nlm.nih.gov/37307982/'),
+        ta('Neurobiología de circuitos de crustáceos','Modelo para entender ritmos y neuromodulación.','Marder y Bucher (revisión).','2007','Annual Review of Physiology','Problema: comprender cómo los circuitos neuronales generan comportamiento flexible. Aporte: el sistema estomatogástrico como modelo. Estado: conocimiento básico consolidado; la extrapolación directa a humanos requiere cautela.','https://pubmed.ncbi.nlm.nih.gov/17009928/'),
+        ta('Conservación y uso biomédico del cangrejo herradura','Balance entre salud pública y biodiversidad.','Investigación y gestión pesquera/conservación.','En curso','Conservación marina','Analiza prácticas de manejo, mortalidad asociada y alternativas para mejorar la sostenibilidad de poblaciones de quelicerados usados históricamente en biomedicina.','https://www.horseshoecrab.org/')
+      ],
+      cultura: [
+        t('c-karkinos','Mitología griega: Karkinos','Cangrejo, Heracles y la Hidra de Lerna.','mitologia',`<p class="muted">Karkinos aparece en tradiciones mitológicas asociadas al combate de Heracles contra la Hidra de Lerna. Las versiones varían según las fuentes antiguas y su transmisión. Algunas tradiciones lo relacionan con la constelación de Cáncer.</p><p class="muted mt-3"><strong class="text-white">Interpretación:</strong> diferenciar el relato mítico, sus variantes y las interpretaciones astronómicas posteriores.</p>`,['https://www.theoi.com/Ther/Karkinos.html','https://www.worldhistory.org/']),
+        t('c-astro','Astrología y astronomía: Cáncer','Constelación, signo zodiacal y simbolismo.','astronomia',`<p class="muted">La constelación de Cáncer y el signo zodiacal homónimo forman parte de tradiciones astronómicas y astrológicas con historia propia. Su iconografía ha cambiado a lo largo del tiempo; conviene separar astronomía observacional de simbolismo astrológico.</p>`,['https://www.worldhistory.org/','https://www.metmuseum.org/']),
+        t('c-asia','Culturas asiáticas','Representaciones y simbolismos en China y Japón.','asia',`<p class="muted">Cangrejos y crustáceos aparecen en gastronomía, arte y tradiciones en distintas regiones de Asia. Las asociaciones simbólicas dependen del periodo, localidad y fuente. Evita generalizaciones no respaldadas por estudios históricos/culturales específicos.</p>`,['https://www.frontiersin.org/journals/marine-science/articles/10.3389/fmars.2025.1556758/full','https://www.metmuseum.org/','https://archive.org/']),
+        t('c-precol','Culturas precolombinas','Representaciones de crustáceos en objetos y arte.','precolombino',`<p class="muted">Existen representaciones de animales acuáticos, incluidos crustáceos, en contextos arqueológicos y artísticos americanos. Su interpretación requiere evidencia iconográfica, contextual y antropológica. Consultar publicaciones especializadas antes de afirmar significados simbólicos.</p>`,['https://www.scielo.sa.cr/scielo.php?pid=S0034-77442025000200008&script=sci_arttext','https://antharky.ucalgary.ca/caadb/sites/antharky.ucalgary.ca.caadb/files/Cox_1991_Flying_Panel_Sculptures.pdf','https://www.jstor.org/']),
+        t('c-criaturas','Criaturas míticas y folclore','Inspiraciones marinas y crustáceas.','folclore',`<p class="muted">Algunas criaturas legendarias marinas pueden compartir rasgos con artrópodos (caparazones, pinzas), pero la relación debe demostrarse caso por caso con fuentes. No se debe afirmar que una criatura se basa en cangrejos sin respaldo documental.</p>`,['https://archive.org/','https://www.jstor.org/']),
+        t('c-arte','Arte y simbolismo histórico','Objetos, cerámica, pintura y ornamentación.','arte',`<p class="muted">Los cangrejos aparecen en artes decorativas y representaciones naturalistas en distintos periodos. Para atribuciones y datación, consultar catálogos museísticos y estudios académicos.</p>`,['https://www.metmuseum.org/','https://commons.wikimedia.org/wiki/Category:Crabs_in_art'])
+      ],
+      ecologia: [
+        t('e-evol','Historia evolutiva','Origen de decápodos, diversificación y carcinización.','evolucion',`<p class="muted">Los cangrejos pertenecen a Decapoda; la evolución de formas “cangrejiformes” (carcinización) se ha discutido como ejemplo de convergencia en distintos linajes. Los tiempos y eventos evolutivos deben respaldarse con literatura paleontológica y filogenética; evita fechas especulativas sin fuente.</p>`,['https://www.marinespecies.org/','https://scholar.google.com/scholar?q=crab+evolution+carcinization','https://ocean.si.edu/']),
+        t('e-func','Ecología y funciones ambientales','Cadenas tróficas, bioturbación y nutrientes.','funcion',`<p class="muted">Los cangrejos pueden actuar como depredadores, carroñeros, herbívoros o detritívoros. Algunas especies remueven sedimentos (bioturbación), influyendo en oxigenación y reciclaje de materia orgánica. Su papel varía entre ecosistemas costeros, estuarios, arrecifes, fondos marinos y ambientes terrestres.</p>`,['https://ocean.si.edu/','https://www.marinebio.org/','https://animaldiversity.org/']),
+        t('e-adapt','Adaptaciones y supervivencia','Anatomía, fisiología y comportamiento.','adaptacion',`<p class="muted">Las adaptaciones incluyen exoesqueleto y muda, quelípedos, camuflaje, excavación, tolerancia a salinidad/temperatura (variable), estrategias reproductivas y, en especies terrestres, mecanismos para funcionar fuera del agua. En profundidades marinas, las presiones y recursos moldean fisiología y conducta.</p>`,['https://animaldiversity.org/','https://eol.org/','https://oceanservice.noaa.gov/']),
+        t('e-rel','Relaciones ecológicas','Depredadores, presas, competencia y simbiosis.','relaciones',`<p class="muted">Los cangrejos interactúan con peces, aves, mamíferos, moluscos, otros crustáceos y microorganismos. Pueden existir relaciones de competencia, parasitismo o simbiosis según especie y hábitat. La influencia en comunidades bentónicas depende del contexto ecológico.</p>`,['https://obis.org/','https://www.gbif.org/','https://eol.org/']),
+        t('e-clima','Cambio climático y supervivencia','Temperatura, acidificación y distribución.','clima',`<p class="muted">El cambio climático puede afectar temperatura, química del océano, hábitats y fenología. La acidificación oceánica y el calentamiento tienen efectos potenciales sobre calcificación, desarrollo larvario y distribución, pero la magnitud varía por especie y evidencia. Distinguir resultados documentados de proyecciones o áreas en investigación.</p>`,['https://oceanservice.noaa.gov/','https://www.iucnredlist.org/','https://ocean.si.edu/'])
+      ],
+      conservacion: [
+        t('k-amenazas','Amenazas principales','Sobrepesca, hábitat, clima y contaminación.','amenaza',`<ul class="list-disc pl-5 muted space-y-2"><li><strong class="text-white">Sobrepesca/captura:</strong> presión extractiva, capturas accidentales o ilegales y efectos sobre poblaciones.</li><li><strong class="text-white">Hábitat:</strong> pérdida de manglares, alteración de fondos, urbanización costera y degradación de arrecifes.</li><li><strong class="text-white">Cambio climático:</strong> calentamiento, acidificación y cambios en distribución/reproducción según especie.</li><li><strong class="text-white">Contaminación:</strong> plásticos, químicos, efluentes y derrames que afectan calidad del agua y organismos.</li></ul>`,['https://www.iucnredlist.org/','https://www.fao.org/fishery/','https://www.cbd.int/'],'all'),
+        t('k-categorias','Categorías oficiales UICN','Definiciones EX–NE con significado.','categoria',`<div class="overflow-x-auto"><table class="text-sm"><thead><tr><th>Categoría</th><th>Sigla</th><th>Significado</th></tr></thead><tbody class="muted">
+        <tr><td>Extinto</td><td>EX</td><td>No quedan individuos conocidos tras búsquedas exhaustivas.</td></tr>
+        <tr><td>Extinto en Estado Silvestre</td><td>EW</td><td>Solo sobrevive en cultivo, cautividad o fuera de su rango histórico.</td></tr>
+        <tr><td>En Peligro Crítico</td><td>CR</td><td>Riesgo extremadamente alto de extinción en estado silvestre.</td></tr>
+        <tr><td>En Peligro</td><td>EN</td><td>Riesgo muy alto de extinción en estado silvestre.</td></tr>
+        <tr><td>Vulnerable</td><td>VU</td><td>Riesgo alto de extinción en estado silvestre.</td></tr>
+        <tr><td>Casi Amenazado</td><td>NT</td><td>Cercano a calificar para una categoría amenazada o probable en el futuro cercano.</td></tr>
+        <tr><td>Preocupación Menor</td><td>LC</td><td>Riesgo bajo en la evaluación actual.</td></tr>
+        <tr><td>Datos Insuficientes</td><td>DD</td><td>Información inadecuada para evaluar riesgo; no significa que no esté amenazada.</td></tr>
+        <tr><td>No Evaluado</td><td>NE</td><td>Aún no evaluado contra los criterios UICN.</td></tr></tbody></table></div><p class="muted text-sm mt-3">Consulta siempre la fecha de evaluación y la versión de la ficha en UICN.</p>`,['https://www.iucnredlist.org/resources/categories-and-criteria'],'all'),
+        t('k-especies','Birgus latro — cangrejo de los cocoteros','Ficha verificada: Vulnerable (VU); confirmar fecha en UICN.','especies',`<p class="muted">Ejemplo documentado: <em>Birgus latro</em> (cangrejo de los cocoteros) aparece como <strong class="text-white">Vulnerable (VU)</strong> en la evaluación citada por UICN (verificar fecha/actualización en la fuente). Es un cangrejo terrestre de islas del Indo-Pacífico, de crecimiento lento y vulnerable a la sobreexplotación y la pérdida de hábitat.</p><div class="mt-3"><a class="btn btn-primary" href="https://www.iucnredlist.org/species/2811/126813586" target="_blank" rel="noopener">Abrir ficha UICN</a></div><p class="text-sm muted mt-3">Para otras especies, revisa la ficha oficial antes de reportar categoría, tendencia o amenazas. No confundas DD con amenaza.</p>`,['https://www.iucnredlist.org/species/2811/126813586','https://www.marinespecies.org/aphia.php?p=taxdetails&id=208668'],'VU'),
+        t('k-cobertura','Cobertura de evaluaciones','Por qué la lista es limitada y cómo buscar más especies.','metodologia',`<p class="muted">La UICN no ha evaluado a todos los cangrejos con el mismo nivel de actualización. Muchas especies comerciales carecen de una evaluación global reciente, y la ausencia de categoría no significa que estén sanas. Esta enciclopedia solo asigna una categoría cuando puede enlazar una ficha oficial verificable.</p><ul class="list-disc pl-5 muted mt-3 space-y-2"><li>Busca por nombre científico, no solo por nombre común.</li><li>Comprueba la fecha de evaluación y la versión de la Lista Roja.</li><li>Distingue evaluación global, regional y nacional.</li><li>No uses “Datos Insuficientes” como sinónimo de “no amenazada”.</li></ul><div class="mt-3"><a class="btn btn-primary" href="https://www.iucnredlist.org/search?query=crab&searchType=species" target="_blank" rel="noopener">Buscar cangrejos en UICN</a></div>`,['https://www.iucnredlist.org/','https://www.iucnredlist.org/resources/categories-and-criteria'],'all'),
+        t('k-medidas','Medidas de conservación','Protección, manejo pesquero y restauración.','medida',`<ul class="list-disc pl-5 muted space-y-2"><li>Áreas marinas protegidas y manejo costero.</li><li>Regulación de capturas, tallas, temporadas y cumplimiento.</li><li>Protección/restauración de manglares, arrecifes y hábitats críticos.</li><li>Monitoreo científico, evaluación de stocks y manejo adaptativo.</li><li>Cooperación internacional cuando corresponda; verificar inclusión en CITES antes de afirmarla.</li></ul>`,['https://www.fao.org/fishery/','https://www.cbd.int/','https://cites.org/'],'all'),
+        t('k-org','Organizaciones e iniciativas','Roles y relación con ecosistemas marinos.','org',`<ul class="list-disc pl-5 muted space-y-2"><li><strong class="text-white">IUCN Red List:</strong> evalúa riesgo de extinción de especies.</li><li><strong class="text-white">WWF:</strong> conservación y proyectos sobre biodiversidad/hábitats.</li><li><strong class="text-white">Marine Conservation Institute:</strong> protección marina y áreas protegidas.</li><li><strong class="text-white">Ocean Conservancy:</strong> políticas y programas de salud oceánica.</li><li><strong class="text-white">CBD:</strong> convenio internacional sobre biodiversidad.</li><li><strong class="text-white">FAO Fisheries:</strong> información y orientación sobre pesca/acuicultura.</li><li><strong class="text-white">CITES:</strong> regula comercio internacional de especies listadas; comprobar apéndices por especie.</li></ul>`,['https://www.iucnredlist.org/','https://www.worldwildlife.org/','https://marine-conservation.org/','https://oceanconservancy.org/','https://www.cbd.int/','https://www.fao.org/fishery/','https://cites.org/'],'all')
+      ]
+    };
+    const TOPIC_IMAGES = {
+      'g-alim':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Blue%20crab%20on%20market%20in%20Piraeus%20-%20Callinectes%20sapidus%20Rathbun%2020020819-317.jpg?width=640',c:'Wikimedia Commons — cangrejo azul en mercado; verificar autor/licencia.',a:'Cangrejo azul en un mercado'},
+      'g-pesca':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Blue%20Chionoecetes%20opilio.JPG?width=640',c:'Wikimedia Commons — Chionoecetes opilio; verificar autor/licencia.',a:'Cangrejo de las nieves'},
+      'g-industria':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Cancer%20pagurus.jpg?width=640',c:'Wikimedia Commons — Cancer pagurus; imagen ilustrativa de exoesqueleto; verificar licencia.',a:'Buey de mar'},
+      'g-snow':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Blue%20Chionoecetes%20opilio.JPG?width=640',c:'Wikimedia Commons — Chionoecetes opilio; verificar autor/licencia.',a:'Cangrejo de las nieves'},
+      'g-blue':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Blue%20crab%20on%20market%20in%20Piraeus%20-%20Callinectes%20sapidus%20Rathbun%2020020819-317.jpg?width=640',c:'Wikimedia Commons — Callinectes sapidus; verificar autor/licencia.',a:'Cangrejo azul'},
+      'g-king':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Paralithodes%20camtschaticus,%201.jpg?width=640',c:'Wikimedia Commons — Paralithodes camtschaticus; verificar autor/licencia.',a:'Cangrejo real rojo'},
+      'g-coco':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Birgus%20latro%20(Bora-Bora).jpg?width=640',c:'Wikimedia Commons — Birgus latro; verificar autor/licencia.',a:'Cangrejo de los cocoteros'},
+      'g-other':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Cancer%20pagurus.jpg?width=640',c:'Wikimedia Commons — Cancer pagurus; imagen ilustrativa; verificar autor/licencia.',a:'Buey de mar'},
+      'c-karkinos':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Caeretan%20hydria%20by%20Eagle%20Painter,%20detail%20of%20crab%20-%20Getty%20Museum%20(83.AE.346).jpg?width=800',c:'Getty Museum / Wikimedia Commons — detalle de un cangrejo en una hidria caeretana; verificar autor, datación y licencia.',a:'Detalle de un cangrejo en una hidria griega'},
+      'c-astro':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Astrology;%20signs%20of%20the%20zodiac,%20Cancer.%20Coloured%20engraving%20b%20Wellcome%20V0024939.jpg?width=800',c:'Wellcome Collection / Wikimedia Commons — grabado de Cáncer; verificar licencia.',a:'Grabado histórico del signo zodiacal Cáncer'},
+      'c-asia':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Aquatic%20Scene%20with%20Crabs.jpeg?width=800',c:'Wikimedia Commons — escena acuática con cangrejos; verificar autoría, cultura y licencia.',a:'Pintura asiática con cangrejos'},
+      'c-precol':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Bottle,%20Crab%20Deity%20MET%2063.226.1%20a.jpg?width=800',c:'The Metropolitan Museum of Art / Wikimedia Commons — recipiente con deidad cangrejo (Moche); verificar ficha, datación y licencia.',a:'Recipiente precolombino con forma de cangrejo'},
+      'c-criaturas':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Lernaean%20Hydra%20Louvre%20CA598%20n2.jpg?width=800',c:'Wikimedia Commons / Louvre — Hidra de Lerna; imagen de contexto mitológico, no un cangrejo.',a:'Hidra de Lerna'},
+      'c-arte':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Crab%20from%20album%20of%206%20urushi-e%20(lacquer%20paintings)%20by%20Shibata%20Zeshin,%20Honolulu%20Museum%20of%20Art.jpg?width=800',c:'Honolulu Museum of Art / Wikimedia Commons — Shibata Zeshin; verificar licencia.',a:'Pintura de cangrejo de Shibata Zeshin'},
+      'e-evol':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Fossil%20Crab.jpg?width=800',c:'Wikimedia Commons — fósil de cangrejo; verificar identificación, autor y licencia.',a:'Fósil de cangrejo'},
+      'e-func':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Crab%20in%20clear%20water%20in%20Mangroves.jpg?width=800',c:'Wikimedia Commons — cangrejo en manglar; verificar autor/licencia.',a:'Cangrejo en aguas de manglar'},
+      'e-adapt':{u:'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/de/Crab_sitting_on_coral_rock_%28Niue%29.jpg/960px-Crab_sitting_on_coral_rock_%28Niue%29.jpg',c:'Wikimedia Commons — cangrejo sobre roca coralina; verificar autor/licencia.',a:'Cangrejo sobre roca de coral'},
+      'e-rel':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Blue-eyed%20coral%20crab%20antler%20coral%20Guam%202022.png?width=800',c:'Wikimedia Commons — cangrejo de coral; verificar autor/licencia.',a:'Cangrejo asociado a coral'},
+      'e-clima':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Coral%20Reefs.jpg?width=800',c:'Wikimedia Commons — arrecife de coral; verificar autor/licencia.',a:'Arrecife de coral'},
+      'k-amenazas':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Crab%20in%20clear%20water%20in%20Mangroves.jpg?width=800',c:'Wikimedia Commons — hábitat de manglar; verificar autor/licencia.',a:'Cangrejo en manglar'},
+      'k-categorias':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Birgus%20latro%20(Bora-Bora).jpg?width=640',c:'Wikimedia Commons — Birgus latro; verificar autor/licencia.',a:'Cangrejo de los cocoteros'},
+      'k-especies':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Birgus%20latro%20(Bora-Bora).jpg?width=640',c:'Wikimedia Commons — Birgus latro; verificar autor/licencia.',a:'Cangrejo de los cocoteros'},
+      'k-cobertura':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Birgus%20latro%20(Bora-Bora).jpg?width=640',c:'Wikimedia Commons — Birgus latro, ejemplo de especie con evaluación UICN citada; la imagen no representa la cobertura global de la Lista Roja. Verificar autor/licencia.',a:'Cangrejo de los cocoteros'},
+      'k-medidas':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Red%20mangrove%20crab%20(Neosarmatium%20meinerti).jpg?width=800',c:'Wikimedia Commons — cangrejo de manglar; verificar autor/licencia.',a:'Cangrejo rojo de manglar'},
+      'k-org':{u:'https://commons.wikimedia.org/wiki/Special:FilePath/Coral%20Reefs.jpg?width=800',c:'Wikimedia Commons — arrecife de coral; verificar autor/licencia.',a:'Arrecife de coral'}
+    };
+    const TOPIC_EXTRAS = {
+      'g-alim':`
+        <h3>Qué significa “importancia alimentaria”</h3>
+        <p>Un cangrejo puede ser un alimento cotidiano, un producto de temporada, un plato festivo o un recurso de subsistencia. Su importancia no depende solo de la abundancia biológica: también intervienen la tradición culinaria, el precio, la facilidad de captura, la cadena de frío y el acceso a mercados. Por eso conviene estudiar cada especie y cada región por separado.</p>
+        <h3>Composición nutricional: qué se puede afirmar</h3>
+        <p>La carne de cangrejo suele aportar proteínas de alto valor biológico y micronutrientes como vitamina B12, zinc, cobre y selenio, aunque las cifras concretas cambian con la especie, el tejido consumido, la época y la preparación. También puede contener sodio añadido por el procesamiento y conservantes. Para una dieta o una ficha nutricional se deben usar tablas oficiales por producto, no una cifra genérica tomada de otra especie.</p>
+        <p><strong>Alergias:</strong> los crustáceos son uno de los grupos alergénicos reconocidos. La información gastronómica no sustituye el consejo médico. Las personas alérgicas deben revisar etiquetas y trazas, y no asumir que una preparación elimina el alérgeno.</p>
+        <h3>Especies, regiones y platos</h3>
+        <ul>
+          <li><strong>Cangrejo azul</strong> (<em>Callinectes sapidus</em>): muy apreciado en la costa atlántica de América del Norte y el Golfo de México; se consume cocido, en sopas, pasteles y preparaciones con carne desmenuzada.</li>
+          <li><strong>Cangrejo de las nieves y cangrejo real</strong>: productos de aguas frías asociados a mercados de América del Norte, Japón, Corea, Rusia y Europa; se comercializan enteros, en patas, congelados o cocidos.</li>
+          <li><strong>Cangrejos de fango</strong> (<em>Scylla</em> spp.): relevantes en el Indo-Pacífico y el sudeste asiático, donde sostienen pesquerías y acuicultura; su carne se usa en curris, salteados y sopas.</li>
+          <li><strong>Buey de mar</strong> (<em>Cancer pagurus</em>): recurso importante en Europa atlántica; se vende vivo o cocido.</li>
+          <li><strong>Cangrejo de los cocoteros</strong>: consumo local y de subsistencia en algunas islas del Indo-Pacífico; no es una gran pesquería comercial y su estado de conservación exige precaución.</li>
+        </ul>
+        <p>Los nombres comerciales pueden agrupar especies distintas. “Cangrejo real”, “cangrejo de las nieves” o “cangrejo de piedra” no siempre corresponden a una sola especie; la trazabilidad y el nombre científico son esenciales para comparar productos.</p>
+        <h3>Preparación, conservación y seguridad</h3>
+        <p>El cangrejo es un alimento perecedero. Las autoridades sanitarias recomiendan mantener la cadena de frío, cocinar suficientemente y evitar el consumo de ejemplares muertos o deteriorados cuando la normativa local lo desaconseja. La congelación, la pasteurización y el enlatado permiten conservar carne, pero cada proceso tiene requisitos técnicos. En casa, la contaminación cruzada con utensilios y superficies es un riesgo evitable.</p>
+        <h3>Consumo responsable</h3>
+        <p>Elegir producto de temporada, respetar tallas y vedas y preferir pesquerías con trazabilidad reduce la presión sobre poblaciones vulnerables. La certificación puede ayudar, pero no reemplaza la consulta de la evaluación de stock y de la normativa local. No todas las especies tienen la misma capacidad de recuperación: las de crecimiento lento y reproducción tardía son especialmente sensibles.</p>`,
+      'g-pesca':`
+        <h3>Dos modelos que conviven</h3>
+        <p>La pesca artesanal suele usar embarcaciones pequeñas, trabajo familiar y conocimientos locales; la industrial emplea mayor capital, capacidad de procesamiento y distribución internacional. La frontera no siempre es nítida: una misma especie puede pasar por ambos circuitos. En muchos lugares, la pesca de cangrejo es estacional y complementa otros ingresos.</p>
+        <h3>Artes y métodos de captura</h3>
+        <ul>
+          <li><strong>Nasas y trampas:</strong> permiten capturar ejemplares vivos y reducir parte del daño asociado a otros artes; su selectividad depende del diseño y de las mallas.</li>
+          <li><strong>Redes y artes de enmalle:</strong> pueden capturar especies no objetivo; requieren regulación y vigilancia.</li>
+          <li><strong>Arrastre:</strong> puede afectar fondos y generar capturas accidentales; su impacto varía con el arte, el hábitat y la gestión.</li>
+          <li><strong>Recolección manual:</strong> común en zonas intermareales, manglares y pesquerías de subsistencia.</li>
+        </ul>
+        <h3>Regulación y manejo</h3>
+        <p>Las medidas habituales incluyen tallas mínimas, vedas reproductivas, límites de captura, cuotas, restricciones de sexo, cierre de áreas y controles de esfuerzo. En algunas pesquerías se usan marcas o muescas en el abdomen para proteger hembras reproductoras. La eficacia depende de datos científicos, cumplimiento, fiscalización y participación de las comunidades pesqueras.</p>
+        <h3>Procesamiento y comercialización</h3>
+        <p>La cadena de valor puede incluir recepción, mantenimiento en vivo, cocción, extracción de carne, congelación, pasteurización, envasado y distribución. La trazabilidad permite relacionar el producto con el origen y la especie. Los mercados internacionales están influidos por aranceles, logística, demanda estacional y competencia entre especies.</p>
+        <h3>Cifras: cómo usarlas sin distorsionar</h3>
+        <p>FAO, NOAA Fisheries y los organismos nacionales publican capturas, valores y estado de stocks con distintos años y métodos. Una cifra aislada no demuestra sostenibilidad. Al citar estadísticas conviene indicar especie, país, arte, año y fuente, y aclarar si se trata de captura desembarcada, producción acuícola o valor comercial.</p>
+        <h3>Riesgos y respuestas</h3>
+        <p>La sobreexplotación, las capturas accidentales, la pesca ilegal y la pérdida de hábitat pueden interactuar. Las respuestas incluyen evaluación de stocks, reducción del esfuerzo, áreas protegidas, artes más selectivos y programas de cumplimiento. No existe una solución única para todas las pesquerías de cangrejo.</p>`,
+      'g-industria':`
+        <h3>Del desperdicio al insumo</h3>
+        <p>El procesamiento genera caparazones, vísceras y otros residuos. En lugar de enviarlos directamente a relleno sanitario, se investiga su uso para recuperar biopolímeros, proteínas, pigmentos y minerales. La viabilidad depende de la escala, la logística de recolección, el costo energético y el control sanitario.</p>
+        <h3>Quitina y quitosano: no son sinónimos</h3>
+        <p>La <strong>quitina</strong> es un polisacárido estructural presente en el exoesqueleto de crustáceos, insectos y otros organismos. El <strong>quitosano</strong> se obtiene principalmente por desacetilación de la quitina; sus propiedades dependen del grado de desacetilación, peso molecular, pureza y proceso. No es correcto presentar ambos como el mismo material ni atribuirles una eficacia médica universal.</p>
+        <h3>Aplicaciones industriales y biotecnológicas</h3>
+        <ul>
+          <li><strong>Tratamiento de agua:</strong> coagulación/floculación y adsorción de contaminantes en investigación y aplicaciones específicas.</li>
+          <li><strong>Agricultura:</strong> formulaciones para liberación controlada, recubrimientos y enmiendas; la eficacia depende del cultivo y del producto.</li>
+          <li><strong>Alimentos y conservación:</strong> recubrimientos y películas comestibles en estudio; deben cumplir regulación alimentaria.</li>
+          <li><strong>Biomateriales:</strong> apósitos, andamios y sistemas de liberación de fármacos en investigación preclínica o clínica según el caso.</li>
+          <li><strong>Recuperación de carotenoides y proteínas:</strong> valorización de subproductos para alimentación animal, nutracéuticos o investigación.</li>
+        </ul>
+        <h3>El caso de los “palitos de cangrejo”</h3>
+        <p>Muchos productos llamados “palitos de cangrejo” son surimi elaborado principalmente con pescado, aromatizado y coloreado. No deben presentarse como carne de cangrejo. La etiqueta y la lista de ingredientes son la referencia.</p>
+        <h3>Economía circular y límites</h3>
+        <p>El aprovechamiento de residuos puede reducir impactos, pero no convierte automáticamente una pesquería en sostenible. Hay que considerar energía, agua, reactivos, residuos secundarios y demanda real. La innovación debe evaluarse con análisis de ciclo de vida y no solo con resultados de laboratorio.</p>`,
+      'g-snow':`
+        <h3>Características</h3>
+        <p><em>Chionoecetes opilio</em> es un cangrejo de aguas frías con caparazón redondeado y patas largas. Los machos suelen alcanzar mayor tamaño que las hembras; la especie muda y crece a lo largo de su vida, y su biología está influida por la temperatura y la disponibilidad de alimento.</p>
+        <h3>Distribución y hábitat</h3>
+        <p>Se distribuye en aguas frías del Atlántico noroeste y del Pacífico norte, con poblaciones en plataformas y taludes. La distribución exacta y la abundancia cambian con la región y el año; para afirmar el estado de un stock hay que consultar la evaluación oficial correspondiente.</p>
+        <h3>Importancia gastronómica y comercial</h3>
+        <p>Es apreciado por su carne dulce y textura firme, especialmente en patas y pinzas. Se comercializa congelado, cocido o en preparaciones listas. Canadá, Groenlandia, Noruega, Rusia, Japón y Alaska participan en pesquerías o mercados relevantes, pero las cuotas y la situación de cada stock no son equivalentes.</p>
+        <h3>Economía y regiones productoras</h3>
+        <p>La especie sostiene empleo en captura, procesamiento y logística. El valor depende del tamaño, la presentación, la temporada y el mercado. No se debe usar una cifra global sin indicar año y fuente.</p>
+        <h3>Situación comercial y ambiental</h3>
+        <p>La gestión suele incluir cuotas, tallas, temporadas y controles de captura. El calentamiento del océano y los cambios en la cobertura de hielo pueden afectar la distribución y el reclutamiento larval; la magnitud varía por población. La pesquería puede tener impactos sobre fondos y especies no objetivo, por lo que la evaluación ambiental es parte del manejo.</p>`,
+      'g-blue':`
+        <h3>Características</h3>
+        <p><em>Callinectes sapidus</em> es un portúnido nadador; su último par de pereiópodos tiene forma de paleta, lo que facilita la natación. Presenta dimorfismo sexual y un caparazón más ancho que largo. Es un depredador oportunista y carroñero en estuarios y aguas costeras.</p>
+        <h3>Distribución</h3>
+        <p>Es nativo del Atlántico occidental, desde la costa de América del Norte hasta el Golfo de México y el Caribe. Ha sido introducido en otras regiones, donde puede establecer poblaciones y generar impactos ecológicos. La distribución debe verificarse con registros locales actualizados.</p>
+        <h3>Importancia gastronómica</h3>
+        <p>Es un producto emblemático de la costa atlántica estadounidense, especialmente en la bahía de Chesapeake y el Golfo de México. Se consume cocido, en sopas, pasteles de cangrejo y carne desmenuzada. La tradición culinaria varía por comunidad y temporada.</p>
+        <h3>Aprovechamiento económico</h3>
+        <p>La pesca se realiza con nasas, redes y otros artes según la jurisdicción. Las regulaciones pueden incluir tallas, vedas, límites y protección de hembras. La acuicultura y el engorde se practican en algunos lugares, pero no sustituyen automáticamente la pesquería.</p>
+        <h3>Impacto ambiental</h3>
+        <p>En su área nativa, la presión pesquera y la calidad del agua son factores importantes. Fuera de su rango, puede competir con especies locales y alterar comunidades bentónicas. No debe presentarse como especie invasora en todos los países sin comprobar el registro.</p>`,
+      'g-king':`
+        <h3>Características y taxonomía</h3>
+        <p><em>Paralithodes camtschaticus</em> es un decápodo anomuro de la familia Lithodidae. Aunque se comercializa como “cangrejo real”, no es un braquiuro verdadero. Su abdomen no está plegado de la misma forma que en los cangrejos típicos y su aspecto recuerda a un cangrejo por convergencia evolutiva.</p>
+        <h3>Distribución</h3>
+        <p>Es nativo del Pacífico norte, con poblaciones en el mar de Bering, el golfo de Alaska y aguas rusas y japonesas. Fue introducido en el mar de Barents, donde se ha expandido y genera debate sobre impactos ecológicos y oportunidades pesqueras.</p>
+        <h3>Importancia gastronómica y comercial</h3>
+        <p>Es uno de los productos de mayor valor unitario del mercado de crustáceos. Las patas y pinzas se venden congeladas o cocidas, y su demanda internacional es alta. El tamaño, la presentación y la certificación influyen en el precio.</p>
+        <h3>Regiones productoras y manejo</h3>
+        <p>Rusia, Estados Unidos (Alaska), Canadá, Japón y Noruega participan en pesquerías o mercados relacionados. La gestión incluye cuotas, temporadas, tallas y límites de captura; la situación de cada stock debe consultarse por separado.</p>
+        <h3>Impacto ambiental</h3>
+        <p>La introducción en el Barents es un caso de estudio sobre expansión de un depredador bentónico. Los impactos sobre comunidades locales y la interacción con otras pesquerías requieren evaluación científica. La comercialización no debe ocultar la discusión sobre manejo y riesgos.</p>`,
+      'g-coco':`
+        <h3>Características</h3>
+        <p><em>Birgus latro</em> es un cangrejo ermitaño terrestre de gran tamaño. Los adultos pueden desarrollar un caparazón endurecido y no dependen de una concha ajena como otros ermitaños, aunque las fases juveniles sí utilizan conchas. Es un animal longevo y de crecimiento lento.</p>
+        <h3>Distribución y hábitat</h3>
+        <p>Vive en islas del Indo-Pacífico, en bosques costeros, manglares y zonas con vegetación. Depende del mar para la liberación de larvas; por ello, la protección de las costas y de los bosques es parte de su conservación.</p>
+        <h3>Importancia gastronómica</h3>
+        <p>Es un recurso de subsistencia y de consumo local en algunas islas, no una especie de gran pesquería industrial. Su carne se aprovecha en contextos culturales específicos, pero la captura puede estar regulada o prohibida según el país o la isla.</p>
+        <h3>Economía y conservación</h3>
+        <p>UICN lo evalúa como <strong>Vulnerable (VU)</strong> en la ficha citada; la fecha y versión deben verificarse. Las amenazas incluyen sobreexplotación, pérdida de hábitat y especies introducidas. Su reproducción lenta lo hace especialmente sensible.</p>
+        <h3>Qué evitar afirmar</h3>
+        <p>No es equivalente a las grandes pesquerías de cangrejo de las nieves o real. Tampoco debe presentarse como “plaga” o “delicadeza exótica” sin contexto: es una especie vulnerable y un recurso local que requiere manejo cuidadoso.</p>`,
+      'c-karkinos':`
+        <h3>El relato y sus variantes</h3>
+        <p>En la tradición griega, Karkinos es un cangrejo enviado por Hera para molestar a Heracles durante su combate contra la Hidra de Lerna. El cangrejo muerde o ataca al héroe y es aplastado; según varias versiones, Hera lo coloca después entre las estrellas. No existe una única narración canónica con todos los detalles: las fuentes antiguas y sus transmisiones difieren.</p>
+        <h3>Contexto del mito</h3>
+        <p>El episodio pertenece al ciclo de los trabajos de Heracles, en el que el héroe enfrenta criaturas monstruosas y fuerzas contrarias. La Hidra es el oponente principal; el cangrejo aparece como un auxiliar pequeño, lo que ha sido leído como ejemplo de lealtad, de oposición menor o de la intervención de Hera contra Heracles.</p>
+        <h3>De Karkinos a Cáncer</h3>
+        <p>La asociación del cangrejo con la constelación de Cáncer es antigua, pero no debe confundirse con una explicación astronómica moderna. El cielo griego y las constelaciones posteriores pasaron por procesos de transmisión, traducción e interpretación. La constelación y el signo zodiacal son objetos culturales e históricos distintos, aunque compartan nombre.</p>
+        <h3>Evidencia visual</h3>
+        <p>La cerámica griega ofrece imágenes de Heracles, la Hidra y cangrejos. Un ejemplo citado en esta ficha es el detalle de un cangrejo en una hidria caeretana conservada en el Getty Museum. La identificación de la escena y su datación deben consultarse en la ficha del museo, no deducirse solo de la imagen.</p>
+        <h3>Interpretaciones y límites</h3>
+        <p>Las lecturas simbólicas modernas pueden ser sugerentes, pero no son evidencia histórica. Es legítimo preguntarse por el significado del cangrejo en el mito; no lo es afirmar que los griegos lo veneraban como dios o que el signo zodiacal deriva directamente de un hecho biológico. Conviene separar texto, imagen, culto y astronomía.</p>`,
+      'c-astro':`
+        <h3>Astronomía y astrología no son lo mismo</h3>
+        <p>La astronomía estudia los astros con métodos observacionales y físicos. La astrología es un conjunto de tradiciones simbólicas que relaciona posiciones celestes con rasgos o destinos; no tiene estatus de ciencia. Esta distinción es esencial para no presentar el zodiaco como una clasificación biológica o astronómica de los cangrejos.</p>
+        <h3>La constelación de Cáncer</h3>
+        <p>Cáncer es una constelación del zodíaco astronómico, una franja del cielo por la que parece desplazarse el Sol. Sus límites modernos fueron definidos por la Unión Astronómica Internacional. La constelación contiene estrellas débiles y su representación como cangrejo proviene de la tradición grecorromana.</p>
+        <h3>El signo zodiacal</h3>
+        <p>El signo de Cáncer se asocia convencionalmente a un período del calendario astrológico y al elemento agua en la tradición occidental. Esa asociación es cultural, no una propiedad del animal. La precesión de los equinoccios hace que el signo astrológico y la constelación astronómica no coincidan del mismo modo que en la antigüedad.</p>
+        <h3>Iconografía histórica</h3>
+        <p>Los grabados, atlas celestes y cartas astrológicas muestran cangrejos con estilos muy distintos. Un grabado coloreado de Cáncer de la Wellcome Collection, citado en la ficha, permite observar cómo el símbolo se integra en un esquema médico-astrológico histórico. La imagen debe leerse en su contexto, no como una fotografía del cielo.</p>
+        <h3>Lectura crítica</h3>
+        <p>Se puede estudiar la astrología como historia cultural, arte y literatura. No se debe usar para asignar propiedades a especies reales ni para sustituir explicaciones ecológicas. La asociación entre cangrejo, agua y transformación es un tema simbólico, no una ley natural.</p>`,
+      'c-asia':`
+        <h3>China: estación, mesa y poesía</h3>
+        <p>En la tradición china, el cangrejo de río y los cangrejos de mar aparecen en la cocina de temporada y en la literatura. El otoño se asocia en algunas regiones con el consumo de cangrejo, y el tema ha inspirado poemas y pinturas. No existe un único simbolismo nacional: las asociaciones cambian por época, región y clase social.</p>
+        <h3>Japón: arte, leyenda y costa</h3>
+        <p>Los cangrejos aparecen en la pintura, la cerámica y la comida japonesa. Un caso conocido es el <em>heikegani</em> (<em>Heikeopsis japonica</em>), un cangrejo cuyo caparazón recuerda vagamente un rostro humano; la tradición lo relaciona con los guerreros del clan Heike. Es una leyenda local, no una prueba de reencarnación ni una explicación biológica.</p>
+        <h3>Sudeste asiático y otras regiones</h3>
+        <p>Los cangrejos de fango (<em>Scylla</em> spp.) son importantes en la cocina y la acuicultura del Indo-Pacífico. En el sudeste asiático se preparan en curris, salteados y sopas; en otras regiones, el cangrejo de río o los cangrejos de agua dulce tienen papeles culinarios propios. Las recetas y tabúes varían mucho.</p>
+        <h3>Cómo estudiar el simbolismo</h3>
+        <p>Conviene distinguir entre práctica culinaria, representación artística, folclore y religión. Una imagen de cangrejo en una cerámica no demuestra por sí sola un culto. La investigación debe apoyarse en catálogos, textos y contextos arqueológicos. La fuente de Frontiers citada en la sección puede servir como punto de partida, pero debe leerse completa y con sus propias referencias.</p>`,
+      'c-precol':`
+        <h3>Arqueología e iconografía</h3>
+        <p>En las Américas, crustáceos y animales marinos aparecen en cerámicas, metales y objetos rituales de distintas culturas. La identificación de un cangrejo requiere observar pinzas, caparazón, patas y contexto; no toda figura redondeada con apéndices es un cangrejo. La interpretación varía según la cultura, el período y la función del objeto.</p>
+        <h3>Moche y Nazca</h3>
+        <p>La cerámica moche del Perú incluye representaciones de animales marinos y seres compuestos. Un recipiente catalogado por el Metropolitan Museum of Art como “Crab Deity” muestra cómo el cangrejo puede integrarse en una imagen de poder o de identidad sobrenatural. En la tradición nazca se conocen vasijas con cangrejos; su significado exacto debe basarse en estudios del contexto funerario o ritual.</p>
+        <h3>Qué se puede interpretar</h3>
+        <p>La presencia de fauna marina en el arte puede relacionarse con dieta, comercio, cosmología o prestigio. Ninguna de esas lecturas se deduce automáticamente de la forma del objeto. La arqueología exige comparar materiales, estratigrafía, iconografía y fuentes coloniales cuando existen.</p>
+        <h3>Evitar generalizaciones</h3>
+        <p>“Los pueblos precolombinos adoraban al cangrejo” es una afirmación demasiado amplia. Es preferible decir que ciertas culturas representaron cangrejos en soportes y contextos específicos, y que su significado es objeto de investigación. La ficha del museo y los artículos académicos son la base para cualquier interpretación.</p>`,
+      'c-criaturas':`
+        <h3>Karkinos: el cangrejo del mito</h3>
+        <p>Karkinos es una criatura mitológica griega con forma de cangrejo, vinculada al ciclo de Heracles. No es una especie real ni un animal identificable taxonómicamente. Su interés está en cómo un animal cotidiano se convierte en personaje narrativo y, más tarde, en signo celeste.</p>
+        <h3>Heikegani: el cangrejo con rostro</h3>
+        <p>En Japón, el <em>heikegani</em> es un cangrejo real cuyo caparazón presenta surcos que el pareidolia humana interpreta como un rostro. La leyenda lo relaciona con los espíritus de los guerreros Heike. La explicación biológica es morfológica; la leyenda es cultural. Ambas pueden estudiarse sin confundirlas.</p>
+        <h3>La Hidra y otras criaturas</h3>
+        <p>La Hidra de Lerna es una serpiente marina multicéfala, no un cangrejo, aunque comparte escena con Karkinos. Otras criaturas marinas de distintos folclores tienen pinzas, caparazones o rasgos artrópodos, pero eso no demuestra una inspiración directa. La comparación morfológica no sustituye la evidencia documental.</p>
+        <h3>Criterios para afirmar una relación</h3>
+        <ul>
+          <li>¿Existe un texto, imagen o tradición que nombre al cangrejo o lo describa?</li>
+          <li>¿La relación es contemporánea a la fuente o una interpretación moderna?</li>
+          <li>¿Se confunde una especie real con una criatura compuesta?</li>
+          <li>¿La fuente distingue folclore local de una tradición más amplia?</li>
+        </ul>`,
+      'c-arte':`
+        <h3>Grecia y Roma</h3>
+        <p>El cangrejo aparece en vasos, monedas y objetos decorativos. Las monedas de Akragas (Sicilia) son un ejemplo conocido de cangrejo como emblema cívico; su presencia no implica que todos los griegos o romanos atribuyeran al animal el mismo significado. La numismática y la cerámica deben leerse con su contexto de producción.</p>
+        <h3>Asia oriental</h3>
+        <p>La pintura china y japonesa incluye cangrejos como tema naturalista y de temporada. La obra de Shibata Zeshin citada en la ficha muestra un cangrejo en un álbum de pinturas laqueadas; el interés está en la técnica, la composición y el gusto por la observación de la naturaleza. No toda imagen de cangrejo es un símbolo religioso.</p>
+        <h3>América precolombina</h3>
+        <p>Cerámicas moche y nazca incluyen cangrejos y seres marinos. El Metropolitan Museum of Art conserva recipientes con cangrejos y deidades asociadas. La atribución cultural y la cronología provienen de la ficha del museo y de la arqueología, no de la apariencia aislada del objeto.</p>
+        <h3>Europa moderna y ciencia</h3>
+        <p>Las ilustraciones de historia natural, los gabinetes de curiosidades y los tratados zoológicos convirtieron al cangrejo en objeto de observación y clasificación. Esas imágenes son fuentes para la historia de la ciencia y del arte, además de documentos taxonómicos.</p>
+        <h3>Cómo citar una imagen</h3>
+        <p>Indica institución, número de inventario, cultura, datación y licencia. No presentes una fotografía de museo como si fuera un objeto genérico. Si la licencia no está clara, enlaza a la ficha y evita reutilizarla sin permiso.</p>`,
+      'e-evol':`
+        <h3>Qué es un cangrejo, taxonómicamente</h3>
+        <p>Los cangrejos verdaderos se agrupan en Brachyura, dentro de Decapoda. Otros animales llamados “cangrejos” —cangrejo real, cangrejo ermitaño, cangrejo de los cocoteros— son anomuros; los cangrejos herradura son quelicerados y no crustáceos. Esta distinción es básica para cualquier comparación evolutiva.</p>
+        <h3>Origen de los decápodos</h3>
+        <p>Decapoda tiene una historia antigua que se remonta al Paleozoico, según el registro fósil y las reconstrucciones filogenéticas. Las fechas exactas y la posición de algunos grupos fósiles siguen siendo objeto de investigación. Por eso conviene hablar de rangos y de incertidumbre, no de una fecha única para “la aparición del cangrejo”.</p>
+        <h3>Carcinización</h3>
+        <p>La carcinización es la evolución repetida de una forma corporal compacta y similar a la de un cangrejo: caparazón ancho, abdomen reducido y plegado, y una silueta que favorece la locomoción y la protección. Ha ocurrido en varios linajes de decápodos, por lo que no todos los “cangrejos” son parientes cercanos. Es un ejemplo clásico de convergencia.</p>
+        <h3>Diversificación de hábitats</h3>
+        <p>Los cangrejos ocupan ambientes marinos, estuarinos, dulceacuícolas y terrestres. La transición a tierra requiere adaptaciones respiratorias, reproductivas y conductuales; la vida en agua dulce exige regular la salinidad y completar el ciclo con fases marinas en muchas especies. Las profundidades marinas imponen oscuridad, presión y recursos limitados.</p>
+        <h3>Cronología general, sin falsa precisión</h3>
+        <ul>
+          <li><strong>Paleozoico:</strong> origen y diversificación temprana de los decápodos; el registro es incompleto.</li>
+          <li><strong>Mesozoico:</strong> diversificación de linajes y aparición de formas compatibles con la carcinización.</li>
+          <li><strong>Cenozoico:</strong> expansión de grupos modernos y de sus adaptaciones actuales.</li>
+        </ul>
+        <p>Estas etapas son un marco general; las fechas concretas dependen del fósil y del método filogenético. No deben convertirse en una línea temporal rígida sin citar la fuente.</p>
+        <h3>Cómo se investiga</h3>
+        <p>La combinación de fósiles, anatomía comparada y datos moleculares permite reconstruir relaciones. Los relojes moleculares aportan estimaciones, pero tienen incertidumbre. Una afirmación evolutiva sólida indica qué evidencia la sostiene y qué preguntas siguen abiertas.</p>`,
+      'e-func':`
+        <h3>Roles tróficos</h3>
+        <p>Los cangrejos pueden ser depredadores, carroñeros, herbívoros, detritívoros o consumidores oportunistas. Su dieta cambia con la especie, la talla, la estación y la disponibilidad de recursos. Un mismo cangrejo puede ocupar varios roles a lo largo de su vida.</p>
+        <h3>Bioturbación</h3>
+        <p>Al excavar madrigueras y remover sedimentos, algunas especies alteran la oxigenación, la textura y el flujo de nutrientes. Este proceso, llamado bioturbación, puede afectar a microorganismos, invertebrados y plantas. La intensidad depende de la densidad de cangrejos y del tipo de sedimento.</p>
+        <h3>Ingenieros del ecosistema</h3>
+        <p>En manglares, cangrejos excavadores y consumidores de hojarasca influyen en la descomposición y en la estructura del suelo. En arrecifes y costas rocosas, el pastoreo y la depredación pueden modificar la cobertura de algas y la composición de la comunidad. No todas las especies tienen el mismo efecto.</p>
+        <h3>Presas y depredadores</h3>
+        <p>Los cangrejos son presa de peces, aves, mamíferos, pulpos y otros crustáceos. Sus larvas forman parte del plancton y son consumidas por filtradores y peces. A su vez, los cangrejos regulan poblaciones de invertebrados y algas. Estas interacciones conectan ambientes bentónicos y pelágicos.</p>
+        <h3>Nutrientes y materia orgánica</h3>
+        <p>La alimentación, la excreción y la descomposición de restos contribuyen al reciclaje de carbono y nutrientes. En zonas costeras, la materia orgánica de manglares y marismas puede pasar por cangrejos antes de incorporarse al sedimento o al agua. La magnitud del flujo es específica de cada ecosistema.</p>
+        <h3>Diferencias entre ambientes</h3>
+        <p>Un cangrejo de manglar, uno de arrecife y uno de aguas profundas no desempeñan la misma función. La comparación debe incluir hábitat, abundancia, dieta y relación con otras especies. Generalizar “el cangrejo” como un único rol ecológico oculta esa diversidad.</p>`,
+      'e-adapt':`
+        <h3>Exoesqueleto y muda</h3>
+        <p>El exoesqueleto protege y sostiene, pero limita el crecimiento. La muda o ecdisis permite aumentar de tamaño; durante ese período el animal es vulnerable y puede esconderse. La frecuencia de muda disminuye con la edad en muchas especies. La regeneración de pinzas o patas perdidas también ocurre en relación con la muda.</p>
+        <h3>Anatomía</h3>
+        <p>El cuerpo compacto, el caparazón, los quelípedos y los pereiópodos permiten excavar, nadar, trepar o defenderse. Los ojos pedunculados y las antenas amplían el campo visual y químico. La forma del cuerpo no es solo estética: está relacionada con el modo de vida.</p>
+        <h3>Fisiología</h3>
+        <p>Las especies costeras pueden regular la salinidad de sus fluidos; otras son más sensibles. La respiración branquial exige agua, aunque algunos cangrejos terrestres mantienen cámaras húmedas y adaptaciones para el aire. La temperatura afecta el metabolismo, la muda y la reproducción, con límites variables por especie y población.</p>
+        <h3>Comportamiento</h3>
+        <p>El camuflaje, el enterramiento, la actividad nocturna, el uso de refugios y la exhibición de pinzas son respuestas frecuentes. Algunas especies son territoriales; otras forman agregaciones o migran. El comportamiento puede modular el efecto del ambiente y reducir el riesgo de depredación.</p>
+        <h3>Ambientes extremos</h3>
+        <p>Los cangrejos de aguas profundas afrontan oscuridad, presión y escasez de alimento. Los organismos de fuentes hidrotermales, como <em>Kiwa hirsuta</em>, presentan adaptaciones particulares y no son cangrejos verdaderos. La vida terrestre exige conservar humedad y resolver la reproducción con dependencia del mar en muchos casos.</p>
+        <h3>Reproducción y migración</h3>
+        <p>Muchas especies incuban huevos bajo el abdomen y liberan larvas planctónicas. Otras tienen desarrollo directo o cuidado parental. Las migraciones reproductivas, como las de algunos cangrejos de agua dulce y terrestres, conectan hábitats y dependen de corredores y condiciones ambientales. La fragmentación del paisaje puede interrumpirlas.</p>`,
+      'e-rel':`
+        <h3>Depredadores y presas</h3>
+        <p>Los cangrejos ocupan posiciones intermedias en las redes tróficas. Los juveniles y las larvas son especialmente vulnerables; los adultos pueden ser presa de peces grandes, aves, mamíferos marinos, pulpos y otros cangrejos. La presión de depredación varía con el hábitat y la estación.</p>
+        <h3>Competencia</h3>
+        <p>La competencia por alimento, refugio o espacio puede ser intensa entre especies nativas e introducidas. En algunos casos, una especie invasora altera la comunidad local; en otros, la evidencia es menos concluyente. La introducción de <em>Callinectes sapidus</em> o <em>Eriocheir sinensis</em> fuera de su rango es un tema de estudio, no una generalización para todos los ecosistemas.</p>
+        <h3>Simbiosis</h3>
+        <p>Existen asociaciones documentadas entre cangrejos y otros organismos, como el cangrejo boxeador que porta anémonas para defensa. Los cangrejos de coral pueden vivir entre ramas y obtener refugio. No toda asociación es simbiosis mutualista; puede ser comensalismo, parasitismo o una relación aún poco estudiada.</p>
+        <h3>Parasitismo</h3>
+        <p>Los cangrejos pueden ser hospedadores de cirrípedos rizocéfalos, isópodos y otros parásitos. Algunos parásitos alteran el comportamiento o la reproducción del hospedador. Estos fenómenos son relevantes para entender la dinámica poblacional y no deben confundirse con una enfermedad humana.</p>
+        <h3>Comunidades bentónicas</h3>
+        <p>Al alimentarse y excavar, los cangrejos modifican la estructura del sedimento y la disponibilidad de recursos para otros organismos. Su influencia depende de la densidad y de las especies presentes. La pérdida de cangrejos puede tener efectos en cascada, pero la magnitud es específica de cada sistema.</p>`,
+      'e-clima':`
+        <h3>Temperatura</h3>
+        <p>El calentamiento del agua puede acelerar el metabolismo, alterar la muda y desplazar la distribución de especies hacia latitudes o profundidades más frías. Las olas de calor marinas pueden provocar mortalidad en poblaciones costeras. La respuesta depende de la tolerancia térmica y de la capacidad de dispersión.</p>
+        <h3>Acidificación oceánica</h3>
+        <p>La disminución del pH afecta la química del carbonato y puede influir en la calcificación, el desarrollo larvario y la supervivencia. Los efectos no son uniformes: algunas especies o etapas son más sensibles que otras. Los resultados de laboratorio no siempre se traducen directamente al campo.</p>
+        <h3>Hábitat y nivel del mar</h3>
+        <p>La pérdida de manglares, arrecifes y marismas reduce refugio y alimento. La subida del nivel del mar y los eventos extremos pueden erosionar zonas costeras. La fragmentación impide que las poblaciones se desplacen a hábitats adecuados.</p>
+        <h3>Reproducción y larvas</h3>
+        <p>La temperatura y la salinidad influyen en el desove, la duración del desarrollo larvario y la supervivencia. Cambios en el momento de la reproducción pueden desajustar la disponibilidad de alimento para las larvas. Es un área activa de investigación y no todos los mecanismos están confirmados para cada especie.</p>
+        <h3>Distribución y especies invasoras</h3>
+        <p>El calentamiento puede facilitar la expansión de especies tolerantes al calor o de invasores. También puede reducir el hábitat adecuado para especies de aguas frías. Las proyecciones deben interpretarse con cautela y con modelos explícitos.</p>
+        <h3>Qué está documentado y qué no</h3>
+        <p>Hay evidencia de cambios de distribución, mortalidad por calor y efectos de acidificación en distintos organismos marinos. Para una especie concreta, hay que revisar estudios locales y la incertidumbre. No se debe presentar una proyección como un hecho observado ni atribuir todos los cambios al clima sin analizar otras presiones.</p>`,
+      'k-amenazas':`
+        <h3>Sobrepesca</h3>
+        <p>La captura excesiva reduce la abundancia y puede alterar la estructura de tallas y la proporción de sexos. Las capturas accidentales y la pesca ilegal agravan el problema. La respuesta no es solo cerrar la pesquería: también se necesitan datos, control, alternativas económicas y participación local.</p>
+        <h3>Destrucción de hábitats</h3>
+        <p>La pérdida de manglares, la degradación de arrecifes, el dragado y la urbanización costera eliminan refugio y zonas de cría. Los cangrejos que dependen de bosques costeros o de fondos estables son especialmente sensibles. La restauración puede ayudar, pero requiere tiempo y condiciones adecuadas.</p>
+        <h3>Cambio climático</h3>
+        <p>El calentamiento, la acidificación, la hipoxia y los eventos extremos pueden afectar la fisiología, la reproducción y la distribución. Los impactos varían por especie y región. La gestión debe incorporar incertidumbre y monitoreo, no solo respuestas reactivas.</p>
+        <h3>Contaminación</h3>
+        <p>Plásticos, microplásticos, pesticidas, metales, hidrocarburos y aguas residuales pueden afectar la salud de los organismos y la calidad del hábitat. Los efectos subletales, como cambios en la alimentación o la reproducción, son difíciles de detectar pero relevantes.</p>
+        <h3>Cómo se relacionan las amenazas</h3>
+        <p>Una población debilitada por pérdida de hábitat puede ser más vulnerable a la pesca; un cambio climático puede reducir el éxito reproductivo y hacer que la extracción sea menos sostenible. El manejo debe considerar estas interacciones y no solo una amenaza a la vez.</p>`,
+      'k-categorias':`
+        <h3>Cómo se aplican las categorías</h3>
+        <p>La UICN evalúa el riesgo de extinción con criterios que consideran reducción poblacional, área de distribución, tamaño poblacional, fragmentación y probabilidad de extinción. La categoría final depende de la evidencia disponible y de la aplicación de umbrales. No es una opinión ni una etiqueta arbitraria.</p>
+        <h3>Datos Insuficientes no es “amenazada”</h3>
+        <p><strong>DD</strong> significa que falta información para evaluar el riesgo; no confirma que la especie esté sana ni que esté en peligro. <strong>NE</strong> significa que no ha sido evaluada. Presentar DD como amenaza o como seguridad son errores frecuentes.</p>
+        <h3>Ejemplo verificado</h3>
+        <p><em>Birgus latro</em> aparece como <strong>Vulnerable (VU)</strong> en la ficha de UICN citada en esta enciclopedia. Antes de citar la categoría, verifica la fecha de evaluación, la versión de la lista y si hubo cambios. No se asignan categorías a otras especies sin una ficha oficial.</p>
+        <h3>Limitaciones de cobertura</h3>
+        <p>Muchos cangrejos comerciales no tienen evaluaciones recientes o completas. La ausencia de una categoría no significa ausencia de riesgo. Para especies de interés pesquero, las evaluaciones de stock y las medidas de manejo pueden ser más informativas que una categoría global.</p>`,
+      'k-especies':`
+        <h3>Cómo usar esta lista</h3>
+        <p>La lista y el filtro muestran fichas con categoría verificada. No es un catálogo completo de todos los cangrejos del mundo. Si una especie no aparece, no se le asigna una categoría por estimación: se indica que debe consultarse la UICN o la autoridad nacional.</p>
+        <h3>Ficha modelo: <em>Birgus latro</em></h3>
+        <ul>
+          <li><strong>Nombre común:</strong> cangrejo de los cocoteros.</li>
+          <li><strong>Distribución:</strong> islas del Indo-Pacífico, en ambientes costeros y bosques.</li>
+          <li><strong>Estado UICN:</strong> Vulnerable (VU), según la ficha citada; verificar fecha.</li>
+          <li><strong>Amenazas:</strong> sobreexplotación, pérdida de hábitat y especies introducidas.</li>
+          <li><strong>Medidas:</strong> protección local, regulación de captura, conservación de hábitat y monitoreo.</li>
+          <li><strong>Fuente:</strong> UICN Red List y WoRMS para taxonomía.</li>
+        </ul>
+        <h3>Otras especies comerciales</h3>
+        <p><em>Callinectes sapidus</em>, <em>Chionoecetes opilio</em>, <em>Paralithodes camtschaticus</em> y <em>Cancer pagurus</em> son importantes para la pesca, pero su situación de conservación no debe deducirse de su valor comercial. Consulta evaluaciones oficiales y no confundas “no evaluado” con “no amenazado”.</p>
+        <h3>Qué datos buscar en una ficha UICN</h3>
+        <p>Nombre científico, categoría, fecha de evaluación, tendencia poblacional, área de distribución, amenazas, medidas y referencias. Si falta uno de esos datos, indícalo. La transparencia es parte del rigor.</p>`,
+      'k-cobertura':`
+        <h3>Por qué no hay una lista completa</h3>
+        <p>La Lista Roja de la UICN es un esfuerzo global, pero su cobertura no es uniforme. Algunos grupos de cangrejos están bien estudiados; otros, especialmente los de aguas profundas, agua dulce o regiones tropicales, tienen información limitada. Una especie sin evaluación no está “no amenazada”: simplemente no ha sido clasificada con los criterios de la UICN.</p>
+        <h3>Cómo buscar una especie</h3>
+        <ul>
+          <li>Usa el nombre científico completo y verifica sinónimos taxonómicos.</li>
+          <li>Comprueba si la evaluación es global, regional o nacional.</li>
+          <li>Lee la fecha de evaluación y la versión de la Lista Roja.</li>
+          <li>Revisa la tendencia poblacional y las amenazas, no solo la sigla.</li>
+          <li>Distingue una evaluación oficial de un artículo secundario que la cita.</li>
+        </ul>
+        <h3>Qué hace esta enciclopedia</h3>
+        <p>Solo asigna una categoría cuando puede enlazar una ficha oficial verificable. Si no hay ficha, indica “consultar” y no rellena el vacío con una estimación. Esa limitación es parte de la honestidad científica del proyecto.</p>`,
+      'k-medidas':`
+        <h3>Áreas marinas protegidas</h3>
+        <p>Las áreas protegidas pueden conservar hábitats críticos, zonas de cría y corredores. Su eficacia depende del diseño, la vigilancia, la conectividad y la participación de las comunidades. Un área sin cumplimiento no protege por sí sola.</p>
+        <h3>Regulación de capturas</h3>
+        <p>Tallas mínimas, vedas, cuotas, límites de sexo y restricciones de arte buscan dejar reproductores y permitir la renovación de la población. En algunas pesquerías se protegen hembras ovígeras o se usan muescas. La norma debe basarse en la biología de la especie y en datos de stock.</p>
+        <h3>Protección y restauración de hábitats</h3>
+        <p>La conservación de manglares, arrecifes, marismas y fondos costeros es inseparable de la conservación de muchos cangrejos. La restauración puede incluir revegetación, recuperación de flujos de agua y reducción de contaminantes. Los resultados deben monitorearse con indicadores claros.</p>
+        <h3>Comercio internacional</h3>
+        <p>CITES regula el comercio de especies incluidas en sus apéndices. No todas las especies de cangrejo están listadas; antes de afirmar que una especie está regulada por CITES, hay que comprobar el apéndice y la fecha. La normativa nacional puede ser más estricta.</p>
+        <h3>Monitoreo y co-manejo</h3>
+        <p>Los programas de monitoreo, la ciencia ciudadana y la participación de pescadores pueden mejorar la información y el cumplimiento. El manejo adaptativo permite ajustar medidas cuando cambian las condiciones. La transparencia y la rendición de cuentas son parte de la gobernanza.</p>`,
+      'k-org':`
+        <h3>Quién hace qué</h3>
+        <ul>
+          <li><strong>UICN y UICN Red List:</strong> evalúan el riesgo de extinción y publican categorías y criterios; no gestionan pesquerías directamente.</li>
+          <li><strong>WWF:</strong> desarrolla proyectos de conservación, incidencia y trabajo con comunidades; su relación con cangrejos depende del programa regional.</li>
+          <li><strong>Marine Conservation Institute:</strong> trabaja en protección marina y áreas protegidas; no es una autoridad taxonómica.</li>
+          <li><strong>Ocean Conservancy:</strong> promueve políticas y programas de salud oceánica, incluida la contaminación por plásticos.</li>
+          <li><strong>CBD:</strong> convenio internacional sobre diversidad biológica; establece marcos y compromisos entre países.</li>
+          <li><strong>FAO Fisheries:</strong> produce información y orientación sobre pesca y acuicultura; no certifica por sí sola la sostenibilidad de un producto.</li>
+          <li><strong>CITES:</strong> regula el comercio internacional de las especies listadas en sus apéndices; su alcance debe verificarse especie por especie.</li>
+        </ul>
+        <h3>Cómo verificar una atribución</h3>
+        <p>Antes de escribir “esta organización protege al cangrejo X”, busca una página o documento de la organización que lo diga. Distingue entre mandato general, programa regional y acción concreta. No atribuyas descubrimientos científicos a una ONG si el artículo original fue publicado por un grupo de investigación.</p>`,
+      'g-other':`
+        <h3>Otras especies documentadas</h3>
+        <p>Además de las especies con grandes pesquerías, existen recursos regionales y de subsistencia. La siguiente tabla es una guía de consulta, no una lista exhaustiva ni una equivalencia comercial.</p>
+        <table>
+          <thead><tr><th>Especie</th><th>Región / interés</th><th>Nota de manejo</th></tr></thead>
+          <tbody>
+            <tr><td><em>Cancer pagurus</em> (buey de mar)</td><td>Atlántico noreste y Europa</td><td>Pesquería importante; verificar tallas, vedas y estado de stock.</td></tr>
+            <tr><td><em>Scylla</em> spp. (cangrejos de fango)</td><td>Indo-Pacífico y sudeste asiático</td><td>Pesca y acuicultura; identificar la especie y la normativa local.</td></tr>
+            <tr><td><em>Menippe</em> spp. (stone crabs)</td><td>Golfo de México y Atlántico occidental</td><td>Pesquerías reguladas; algunas pesquerías extraen solo pinzas.</td></tr>
+            <tr><td><em>Eriocheir sinensis</em> (cangrejo chino de mitón)</td><td>Asia oriental; introducido en otras regiones</td><td>Especie invasora en varios lugares; no promover su liberación.</td></tr>
+            <tr><td><em>Ucides cordatus</em> (uçá)</td><td>Manglares del Atlántico occidental</td><td>Pesca artesanal y relevancia ecológica; sensible a la pérdida de manglar.</td></tr>
+          </tbody>
+        </table>
+        <p>No todas estas especies tienen la misma importancia económica ni el mismo estado de conservación. La tabla no asigna categorías UICN; para ello consulta la ficha oficial.</p>`
+    };
+    function t(id,title,subtitle,kind,html,sources,iucnCat){return {id,title,subtitle,kind,html,sources,iucnCat:iucnCat||'all'};}
+    function ta(title,importance,authors,year,journal,summary,url){return {title,importance,authors,year,journal,summary,url};}
+    function topicCard(section,item){
+      const img = TOPIC_IMAGES[item.id];
+      const media = img ? `<div class="mb-4 overflow-hidden rounded-xl border border-[var(--line)] bg-[#08131b]">
+        <img src="${img.u}" alt="${escapeHtml(img.a)}" loading="lazy" class="w-full h-40 object-cover" onerror="this.closest('div').innerHTML='<div class=&quot;h-40 grid place-items-center text-xs muted px-4 text-center&quot;>Imagen no disponible; consulta la fuente del artículo.</div>'">
+        <p class="text-[11px] muted px-3 py-2 leading-4">${escapeHtml(img.c)}</p></div>` : '';
+      return `<article class="card p-5 cursor-pointer hover:border-[rgba(45,212,191,.35)] transition" onclick="openTopic('${section}','${item.id}')">
+        ${media}
+        <div class="text-xs accent font-semibold mb-1">${escapeHtml(item.kind||'artículo')}</div>
+        <h3 class="text-xl font-semibold mb-2">${item.title}</h3>
+        <p class="muted text-sm">${item.subtitle||''}</p>
+        <div class="mt-4 text-sm accent">Abrir artículo →</div>
+      </article>`;
+    }
+    function openTopic(section,id){
+      const list = TOPICS[section]; const item = list && list.find(x=>x.id===id); if(!item) return;
+      const src = (item.sources||[]).map(u=>`<li class="break-words"><a href="${u}" target="_blank" rel="noopener">${u}</a></li>`).join('');
+      const img = TOPIC_IMAGES[item.id];
+      const heroImg = img ? `<figure class="card overflow-hidden mb-5"><img src="${img.u}" alt="${escapeHtml(img.a)}" loading="lazy" class="w-full max-h-[360px] object-cover" onerror="this.closest('figure').innerHTML='<div class=&quot;p-6 text-sm muted&quot;>Imagen no disponible. La ficha se mantiene con las fuentes indicadas.</div>'"><figcaption class="text-xs muted px-4 py-3 border-t border-[var(--line)]">${escapeHtml(img.c)}</figcaption></figure>` : '';
+      openDetail(item.title.replace(/<[^>]+>/g,''), `${sectionLabel(section)} / Artículo`, `
+        <div class="detail-hero p-6 mb-5"><div class="text-xs accent font-semibold mb-1">${escapeHtml(item.kind||'')}</div><h2 class="font-display text-3xl font-bold mb-2">${item.title}</h2><p class="muted">${item.subtitle||''}</p></div>
+        ${heroImg}
+        <article class="card p-6"><div class="prose-like text-sm leading-7">${item.html}${TOPIC_EXTRAS[item.id]||''}</div></article>
+        <section class="card p-6 mt-5 source"><h3 class="text-xl font-semibold mb-3">Fuentes y referencias</h3><ul class="list-disc pl-5 muted text-sm space-y-2">${src||'<li>No disponible</li>'}</ul><p class="text-xs muted mt-4">Las fechas, cifras y categorías deben verificarse en la fuente original. Esta enciclopedia no sustituye una evaluación oficial ni asesoramiento médico o pesquero.</p></section>`);
+    }
+    function sectionLabel(s){return ({gastronomia:'Gastronomía e industria',cultura:'Cultura y mitología',ecologia:'Ecología y supervivencia',conservacion:'Conservación'})[s]||s;}
+    function renderTopics(){
+      const g=document.getElementById('gastronomiaList'); if(g) g.innerHTML=TOPICS.gastronomia.map(i=>topicCard('gastronomia',i)).join('');
+      const c=document.getElementById('culturaList'); if(c) c.innerHTML=TOPICS.cultura.map(i=>topicCard('cultura',i)).join('');
+      const e=document.getElementById('ecologiaList'); if(e) e.innerHTML=TOPICS.ecologia.map(i=>topicCard('ecologia',i)).join('');
+      renderConservation();
+      renderScience();
+    }
+    function renderConservation(){
+      const f=document.getElementById('iucnFilter')?.value||'all';
+      const items=TOPICS.conservacion.filter(i=>f==='all'||i.iucnCat===f);
+      const el=document.getElementById('conservacionList');
+      if(el) el.innerHTML=items.length?items.map(i=>topicCard('conservacion',i)).join(''):'<div class="card p-5 text-sm muted md:col-span-2 xl:col-span-3">No hay fichas verificadas con esa categoría en esta selección. Consulta directamente la UICN Red List; no se asignan categorías por estimación.</div>';
+    }
+    function renderScience(){
+      const a=document.getElementById('scienceArticles');
+      if(a) a.innerHTML=TOPICS.cienciaArticles.map(x=>`<article class="p-4 rounded-xl border border-[var(--line)]"><h4 class="font-semibold">${escapeHtml(x.title)}</h4><p class="text-xs muted mt-1">${escapeHtml(x.authors)} · ${escapeHtml(x.year)} · ${escapeHtml(x.journal)}</p><p class="muted text-sm mt-2"><strong class="text-white">Importancia:</strong> ${escapeHtml(x.importance)}</p><p class="muted text-sm mt-1">${escapeHtml(x.summary)}</p><a class="accent underline text-sm" href="${x.url}" target="_blank" rel="noopener">Enlace / búsqueda</a></article>`).join('');
+      const b=document.getElementById('scienceAdvances');
+      if(b) b.innerHTML=TOPICS.cienciaAdvances.map(x=>`<article class="p-4 rounded-xl border border-[var(--line)]"><h4 class="font-semibold">${escapeHtml(x.title)}</h4><p class="text-xs muted mt-1">${escapeHtml(x.authors)} · ${escapeHtml(x.year)}</p><p class="muted text-sm mt-2"><strong class="text-white">Aporta:</strong> ${escapeHtml(x.importance)}</p><p class="muted text-sm mt-1">${escapeHtml(x.summary)}</p><a class="accent underline text-sm" href="${x.url}" target="_blank" rel="noopener">Fuente</a></article>`).join('');
+    }
+
+    // Init
+    initIntro();
+    renderTopics();
+    initCatalog();
+  </script>
+</body>
+</html>
